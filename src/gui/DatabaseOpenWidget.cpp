@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QBuffer>
+
 #include "DatabaseOpenWidget.h"
 #include "ui_DatabaseOpenWidget.h"
 
@@ -26,6 +28,7 @@
 #include "format/KeePass2Reader.h"
 #include "keys/FileKey.h"
 #include "keys/PasswordKey.h"
+#include "bluetooth/BluetoothDevice.h"
 
 DatabaseOpenWidget::DatabaseOpenWidget(QWidget* parent)
     : DialogyWidget(parent)
@@ -97,15 +100,27 @@ void DatabaseOpenWidget::openDatabase()
     KeePass2Reader reader;
     CompositeKey masterKey = databaseKey();
 
-    QFile file(m_filename);
+    // ND QFile file(m_filename);
+    BluetoothDevice *instance = btDevice();
+    instance->connectDevice();
+    QByteArray fileData = instance->readFileFromCard(QString(DB_FILE_DIR) + QString(DB_FILE_NAME));
+
+    QBuffer file(&fileData);
+
     if (!file.open(QIODevice::ReadOnly)) {
         MessageBox::warning(this, tr("Error"), tr("Unable to open the database.").append("\n")
                             .append(file.errorString()));
         return;
     }
+
     if (m_db) {
         delete m_db;
     }
+
+
+
+
+
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_db = reader.readDatabase(&file, masterKey);
     QApplication::restoreOverrideCursor();
@@ -118,6 +133,7 @@ void DatabaseOpenWidget::openDatabase()
                             .append(reader.errorString()));
         m_ui->editPassword->clear();
     }
+    instance->disconnectDevice();
 }
 
 CompositeKey DatabaseOpenWidget::databaseKey()

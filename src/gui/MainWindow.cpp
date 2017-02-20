@@ -215,6 +215,9 @@ MainWindow::MainWindow()
                                 SLOT(openSearch()));
 
     updateTrayIcon();
+
+    // ND : TODO disable menu items
+    m_ui->actionDatabaseSaveAs->setEnabled(false);
 }
 
 MainWindow::~MainWindow()

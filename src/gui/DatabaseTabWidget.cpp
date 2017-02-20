@@ -22,6 +22,7 @@
 #include <QSaveFile>
 #include <QTabWidget>
 #include <QBuffer>
+#include <QDebug>
 
 #include "autotype/AutoType.h"
 #include "core/Config.h"
@@ -299,19 +300,29 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
     DatabaseManagerStruct& dbStruct = m_dbList[db];
 
     if (dbStruct.saveToFilename) {
-        QSaveFile saveFile(dbStruct.canonicalFilePath);
-        if (saveFile.open(QIODevice::WriteOnly)) {
+        //QSaveFile saveFile(dbStruct.canonicalFilePath);
+
+        QBuffer saveFile ;
+       // if (saveFile.open(QIODevice::WriteOnly)) {
+         if (saveFile.open(QIODevice::ReadWrite)) {
             m_writer.writeDatabase(&saveFile, db);
             if (m_writer.hasError()) {
                 MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
                                      + m_writer.errorString());
                 return false;
             }
-            if (!saveFile.commit()) {
-                MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
-                                     + saveFile.errorString());
-                return false;
-            }
+
+
+           BluetoothDevice *instance = btDevice();
+           instance->connectDevice();
+           instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data());
+           instance->disconnectDevice();
+
+            //if (!saveFile.close()) {
+                //MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
+                 //                    + saveFile.errorString());
+                //return false;
+           // }
         }
         else {
             MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"

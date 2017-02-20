@@ -30,7 +30,6 @@
 #include "streams/HashedBlockStream.h"
 #include "streams/QtIOCompressor"
 #include "streams/SymmetricCipherStream.h"
-#include "bluetooth/BluetoothDevice.h"
 
 #define CHECK_RETURN(x) if (!(x)) return;
 #define CHECK_RETURN_FALSE(x) if (!(x)) return false;

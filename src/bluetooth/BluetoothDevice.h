@@ -10,25 +10,32 @@
 #define DB_FILE_NAME "db.kdbx"
 #define DB_FILE_DIR       "/data/"
 
-#define  PACKET_SIZE        507
+#define  PACKET_SIZE        512
+#define  HEADER_SIZE        3
+#define  CHECKSUM_SIZE      2
 #define  COMMAND_CHANNEL    1
 #define  DATA_CHANNEL       2
-#define  MAX_CHANNEL_NUMBER 2
+
 
 
 #define  MOST_SIGNIFICANT_BIT  0x00
 #define  LEAST_SIGNIFICANT_BIT  0x00
-#define  UPLOAD_DELAY_MILLIS    1000
+#define  UPLOAD_DELAY_MILLIS    10000
 
 #define  MKD    "MKD"
-#define  LIST    "LIST"
+#define  LIST   "LIST"
+#define  RETR   "RETR"
+#define  MLST   "MLST"
+#define  DELE   "DELE"
 
 
 // STATUS CODES
 // LIST FILE
-#define LIST_FILE_SUCCESS   226
+#define FILE_ACTION_SUCCESS   226
 #define PATH_NOT_FOUND      550
 #define UNAUTHENTICATED     530
+#define DELETE_ACTION_SUCCESS   250
+#define FILE_STATUS_OK      150
 
  class BluetoothDevice : public QObject
 {
@@ -43,21 +50,26 @@ public:
     void writeData(QByteArray data);
     void readData(QByteArray* data);
     void createFolder(QString path);
-    bool checkifFileExists(QString path, QString fileName);
+    bool checkIfFileExists(QString path, QString fileName);
     QByteArray createDataPacket(QByteArray data , int dataChannel);
     QString getErrorMessage();
     int getSerialPortError();
-     void parseResponse(QByteArray response, QList<int> * statusCodes , QList<QString>* messages , int* finalStatusCode);
+     void parseResponse(QByteArray response, QList<int> * statusCodes , QList<QByteArray>* messages , int* finalStatusCode);
+     QByteArray dePacketizeStream(QByteArray inputStream);
+     void storeFileOnCard(QString onCardPath, QString fileName, QByteArray data);
+     QByteArray readFileFromCard(QString fileName);
+     void listMemoryInfo(QString path);
+     void deleteFile(QString path);
+     void writeToDevice(QByteArray data) ;
 private Q_SLOTS:
     void reportSerialPortError();
    // void handleReadyRead();
 private:
+    Q_DISABLE_COPY(BluetoothDevice)
     BluetoothDevice(const QString& portName, QObject* parent);
     explicit BluetoothDevice(QObject* parent);
     static BluetoothDevice* m_instance;
     QString m_fileName ;
-    Q_DISABLE_COPY(BluetoothDevice)
-public:
     QSerialPort* m_serialPort;
 
 };

@@ -18,6 +18,7 @@
 #include <QCommandLineParser>
 #include <QFile>
 #include <QSerialPort>
+#include <QDebug>
 
 #include "config-keepassx.h"
 #include "core/Config.h"
@@ -108,15 +109,20 @@ int main(int argc, char** argv)
     // Connect to CyberGateCard (BlueToothDevice)
     BluetoothDevice *btDeviceInstance = btDevice();
     btDeviceInstance->connectDevice();
-   if(btDeviceInstance->checkifFileExists(DB_FILE_DIR, DB_FILE_NAME))
-   {
 
-       // openDataBase
-   }
-   else
-   {
-       // createNewDataBase
-   }
-   btDeviceInstance->disconnectDevice();
+    if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
+    {
+
+        // openDataBase
+    }
+    else
+    {
+        // createNewDataBase
+    }
+
+
+    btDeviceInstance->disconnectDevice();
+
+
     return app.exec();
 }
