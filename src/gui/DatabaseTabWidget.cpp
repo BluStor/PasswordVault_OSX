@@ -89,6 +89,8 @@ void DatabaseTabWidget::toggleTabbar()
     }
 }
 
+
+// ND - make changes here
 void DatabaseTabWidget::newDatabase()
 {
     DatabaseManagerStruct dbStruct;
@@ -101,87 +103,69 @@ void DatabaseTabWidget::newDatabase()
     dbStruct.dbWidget->switchToMasterKeyChange();
 }
 
+
+// ND - make changes here
 void DatabaseTabWidget::openDatabase()
 {
-    QString filter = QString("%1 (*.kdbx);;%2 (*)").arg(tr("KeePass 2 Database"), tr("All files"));
+  /*  QString filter = QString("%1 (*.kdbx);;%2 (*)").arg(tr("KeePass 2 Database"), tr("All files"));
     QString fileName = fileDialog()->getOpenFileName(this, tr("Open database"), QString(),
                                                      filter);
+  */
+    QString fileName  = QString(DB_FILE_DIR) + QString(DB_FILE_NAME);
     if (!fileName.isEmpty()) {
         openDatabase(fileName);
     }
 }
 
+// ND - make changes here
 void DatabaseTabWidget::openDatabase(const QString& fileName, const QString& pw,
                                      const QString& keyFile)
 {
-    QFileInfo fileInfo(fileName);
+   /* QFileInfo fileInfo(fileName);
     QString canonicalFilePath = fileInfo.canonicalFilePath();
     if (canonicalFilePath.isEmpty()) {
         MessageBox::warning(this, tr("Warning"), tr("File not found!"));
         return;
     }
 
-
-    QHashIterator<Database*, DatabaseManagerStruct> i(m_dbList);
-    while (i.hasNext()) {
-        i.next();
-        if (i.value().canonicalFilePath == canonicalFilePath) {
-            setCurrentIndex(databaseIndex(i.key()));
-            return;
-        }
-    }
-
+*/
     DatabaseManagerStruct dbStruct;
 
-    // test if we can read/write or read the file
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadWrite)) {
-        if (!file.open(QIODevice::ReadOnly)) {
-            MessageBox::warning(this, tr("Error"), tr("Unable to open the database.").append("\n")
-                                .append(file.errorString()));
-            return;
-        }
-        else {
-            // can only open read-only
-            dbStruct.readOnly = true;
-        }
-    }
-    file.close();
+    BluetoothDevice *btDeviceInstance = btDevice();
 
-    QLockFile* lockFile = new QLockFile(QString("%1/.%2.lock").arg(fileInfo.canonicalPath(), fileInfo.fileName()));
-    lockFile->setStaleLockTime(0);
+    if(btDeviceInstance->checkIfFileExists(fileName, NULL))
+    {
 
-    if (!dbStruct.readOnly && !lockFile->tryLock()) {
-        // for now silently ignore if we can't create a lock file
-        // due to lack of permissions
-        if (lockFile->error() != QLockFile::PermissionError) {
-            QMessageBox::StandardButton result = MessageBox::question(this, tr("Open database"),
-                tr("The database you are trying to open is locked by another instance of KeePassX.\n"
-                   "Do you want to open it anyway? Alternatively the database is opened read-only."),
-                QMessageBox::Yes | QMessageBox::No);
+        // openDataBase
 
-            if (result == QMessageBox::No) {
-                dbStruct.readOnly = true;
-                delete lockFile;
-                lockFile = nullptr;
-            }
-            else {
-                // take over the lock file if possible
-                if (lockFile->removeStaleLockFile()) {
-                    lockFile->tryLock();
-                }
+
+        QHashIterator<Database*, DatabaseManagerStruct> i(m_dbList);
+        while (i.hasNext()) {
+            i.next();
+            if (i.value().canonicalFilePath == fileName) {
+                setCurrentIndex(databaseIndex(i.key()));
+                return;
             }
         }
+
+    }
+    else
+    {
+        // ND : TODO checkif any error message can be included ?
+        MessageBox::warning(this, tr("Error"), tr("Unable to open the database."));
+        return;
     }
 
-    Database* db = new Database();
+
+
+      Database* db = new Database();
     dbStruct.dbWidget = new DatabaseWidget(db, this);
-    dbStruct.lockFile = lockFile;
-    dbStruct.saveToFilename = !dbStruct.readOnly;
+    dbStruct.lockFile = NULL;
+    dbStruct.saveToFilename = true;
 
-    dbStruct.filePath = fileInfo.absoluteFilePath();
-    dbStruct.canonicalFilePath = canonicalFilePath;
-    dbStruct.fileName = fileInfo.fileName();
+    dbStruct.filePath = DB_FILE_DIR + QString(DB_FILE_NAME);
+    dbStruct.canonicalFilePath = fileName;
+    dbStruct.fileName = DB_FILE_NAME;
 
     insertDatabase(db, dbStruct);
 

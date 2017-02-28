@@ -20,7 +20,7 @@
 
 #define  MOST_SIGNIFICANT_BIT  0x00
 #define  LEAST_SIGNIFICANT_BIT  0x00
-#define  UPLOAD_DELAY_MILLIS    10000
+#define  UPLOAD_DELAY_MILLIS    1000
 
 #define  MKD    "MKD"
 #define  LIST   "LIST"
@@ -55,7 +55,7 @@ public:
     QString getErrorMessage();
     int getSerialPortError();
      void parseResponse(QByteArray response, QList<int> * statusCodes , QList<QByteArray>* messages , int* finalStatusCode);
-     QByteArray dePacketizeStream(QByteArray inputStream);
+     QByteArray dePacketizeStream(QByteArray inputStream , int* pFinalStatusCode);
      void storeFileOnCard(QString onCardPath, QString fileName, QByteArray data);
      QByteArray readFileFromCard(QString fileName);
      void listMemoryInfo(QString path);

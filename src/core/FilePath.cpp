@@ -20,9 +20,10 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QLibrary>
-
+#include <QDebug>
 #include "config-keepassx.h"
 #include "core/Global.h"
+#define Q_OS_MAC
 
 FilePath* FilePath::m_instance(nullptr);
 
@@ -179,7 +180,7 @@ FilePath::FilePath()
     }
 #ifdef QT_DEBUG
     else if (testSetDir(QString(KEEPASSX_SOURCE_DIR) + "/share")) {
-    }
+   }
 #endif
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
     else if (isDataDirAbsolute && testSetDir(KEEPASSX_DATA_DIR)) {

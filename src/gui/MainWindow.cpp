@@ -55,11 +55,11 @@ MainWindow::MainWindow()
     m_ui->toolBar->setVisible(showToolbar);
     connect(m_ui->toolBar, SIGNAL(visibilityChanged(bool)), this, SLOT(saveToolbarState(bool)));
 
-    m_clearHistoryAction = new QAction("Clear history", m_ui->menuFile);
-    m_lastDatabasesActions = new QActionGroup(m_ui->menuRecentDatabases);
-    connect(m_clearHistoryAction, SIGNAL(triggered()), this, SLOT(clearLastDatabases()));
-    connect(m_lastDatabasesActions, SIGNAL(triggered(QAction*)), this, SLOT(openRecentDatabase(QAction*)));
-    connect(m_ui->menuRecentDatabases, SIGNAL(aboutToShow()), this, SLOT(updateLastDatabasesMenu()));
+    //  m_clearHistoryAction = new QAction("Clear history", m_ui->menuFile);
+    //  m_lastDatabasesActions = new QActionGroup(m_ui->menuRecentDatabases);
+    //  connect(m_clearHistoryAction, SIGNAL(triggered()), this, SLOT(clearLastDatabases()));
+    // connect(m_lastDatabasesActions, SIGNAL(triggered(QAction*)), this, SLOT(openRecentDatabase(QAction*)));
+    //  connect(m_ui->menuRecentDatabases, SIGNAL(aboutToShow()), this, SLOT(updateLastDatabasesMenu()));
 
     m_copyAdditionalAttributeActions = new QActionGroup(m_ui->menuEntryCopyAttribute);
     m_actionMultiplexer.connect(m_copyAdditionalAttributeActions, SIGNAL(triggered(QAction*)),
@@ -83,7 +83,7 @@ MainWindow::MainWindow()
 
     setShortcut(m_ui->actionDatabaseOpen, QKeySequence::Open, Qt::CTRL + Qt::Key_O);
     setShortcut(m_ui->actionDatabaseSave, QKeySequence::Save, Qt::CTRL + Qt::Key_S);
-    setShortcut(m_ui->actionDatabaseSaveAs, QKeySequence::SaveAs);
+    // ND setShortcut(m_ui->actionDatabaseSaveAs, QKeySequence::SaveAs);
     setShortcut(m_ui->actionDatabaseClose, QKeySequence::Close, Qt::CTRL + Qt::Key_W);
     m_ui->actionLockDatabases->setShortcut(Qt::CTRL + Qt::Key_L);
     setShortcut(m_ui->actionQuit, QKeySequence::Quit, Qt::CTRL + Qt::Key_Q);
@@ -177,35 +177,35 @@ MainWindow::MainWindow()
     connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
 
     m_actionMultiplexer.connect(m_ui->actionEntryNew, SIGNAL(triggered()),
-            SLOT(createEntry()));
+                                SLOT(createEntry()));
     m_actionMultiplexer.connect(m_ui->actionEntryClone, SIGNAL(triggered()),
-            SLOT(cloneEntry()));
+                                SLOT(cloneEntry()));
     m_actionMultiplexer.connect(m_ui->actionEntryEdit, SIGNAL(triggered()),
-            SLOT(switchToEntryEdit()));
+                                SLOT(switchToEntryEdit()));
     m_actionMultiplexer.connect(m_ui->actionEntryDelete, SIGNAL(triggered()),
-            SLOT(deleteEntries()));
+                                SLOT(deleteEntries()));
 
     m_actionMultiplexer.connect(m_ui->actionEntryCopyTitle, SIGNAL(triggered()),
-            SLOT(copyTitle()));
+                                SLOT(copyTitle()));
     m_actionMultiplexer.connect(m_ui->actionEntryCopyUsername, SIGNAL(triggered()),
-            SLOT(copyUsername()));
+                                SLOT(copyUsername()));
     m_actionMultiplexer.connect(m_ui->actionEntryCopyPassword, SIGNAL(triggered()),
-            SLOT(copyPassword()));
+                                SLOT(copyPassword()));
     m_actionMultiplexer.connect(m_ui->actionEntryCopyURL, SIGNAL(triggered()),
-            SLOT(copyURL()));
+                                SLOT(copyURL()));
     m_actionMultiplexer.connect(m_ui->actionEntryCopyNotes, SIGNAL(triggered()),
-            SLOT(copyNotes()));
+                                SLOT(copyNotes()));
     m_actionMultiplexer.connect(m_ui->actionEntryAutoType, SIGNAL(triggered()),
-            SLOT(performAutoType()));
+                                SLOT(performAutoType()));
     m_actionMultiplexer.connect(m_ui->actionEntryOpenUrl, SIGNAL(triggered()),
-            SLOT(openUrl()));
+                                SLOT(openUrl()));
 
     m_actionMultiplexer.connect(m_ui->actionGroupNew, SIGNAL(triggered()),
-            SLOT(createGroup()));
+                                SLOT(createGroup()));
     m_actionMultiplexer.connect(m_ui->actionGroupEdit, SIGNAL(triggered()),
-            SLOT(switchToGroupEdit()));
+                                SLOT(switchToGroupEdit()));
     m_actionMultiplexer.connect(m_ui->actionGroupDelete, SIGNAL(triggered()),
-            SLOT(deleteGroup()));
+                                SLOT(deleteGroup()));
 
     connect(m_ui->actionSettings, SIGNAL(triggered()), SLOT(switchToSettings()));
 
@@ -218,6 +218,7 @@ MainWindow::MainWindow()
 
     // ND : TODO disable menu items
     m_ui->actionDatabaseSaveAs->setEnabled(false);
+    m_ui->actionDatabaseSaveAs->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -226,7 +227,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateLastDatabasesMenu()
 {
-    m_ui->menuRecentDatabases->clear();
+  /*  m_ui->menuRecentDatabases->clear();
 
     const QStringList lastDatabases = config()->get("LastDatabases", QVariant()).toStringList();
     for (const QString& database : lastDatabases) {
@@ -236,6 +237,7 @@ void MainWindow::updateLastDatabasesMenu()
     }
     m_ui->menuRecentDatabases->addSeparator();
     m_ui->menuRecentDatabases->addAction(m_clearHistoryAction);
+    */
 }
 
 void MainWindow::updateCopyAttributesMenu()
@@ -316,7 +318,7 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
             m_ui->actionChangeMasterKey->setEnabled(true);
             m_ui->actionChangeDatabaseSettings->setEnabled(true);
             m_ui->actionDatabaseSave->setEnabled(true);
-            m_ui->actionDatabaseSaveAs->setEnabled(true);
+           //ND  m_ui->actionDatabaseSaveAs->setEnabled(true);
             m_ui->actionExportCsv->setEnabled(true);
             break;
         }
@@ -378,14 +380,26 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
         m_ui->actionExportCsv->setEnabled(false);
     }
 
-    bool inDatabaseTabWidgetOrWelcomeWidget = inDatabaseTabWidget || inWelcomeWidget;
+    // ND bool inDatabaseTabWidgetOrWelcomeWidget = inDatabaseTabWidget || inWelcomeWidget;
+    bool inDatabaseTabWidgetOrWelcomeWidget = inWelcomeWidget;
     m_ui->actionDatabaseNew->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
     m_ui->actionDatabaseOpen->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
-    m_ui->menuRecentDatabases->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
+    //    m_ui->menuRecentDatabases->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
     m_ui->actionImportKeePass1->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
     m_ui->actionRepairDatabase->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
 
-    m_ui->actionLockDatabases->setEnabled(m_ui->tabWidget->hasLockableDatabases());
+    // ND m_ui->actionLockDatabases->setEnabled(m_ui->tabWidget->hasLockableDatabases());
+
+    m_ui->actionLockDatabases->setEnabled(false);
+    m_ui->actionLockDatabases->setVisible(false);
+
+    m_ui->menuTools->setEnabled(false);
+    m_ui->menuTools->setVisible(false);
+    m_ui->actionRepairDatabase->setEnabled(false);
+    m_ui->actionRepairDatabase->setVisible(false);
+    m_ui->actionImportKeePass1->setEnabled(false);
+    m_ui->actionImportKeePass1->setVisible(false);
+
 }
 
 void MainWindow::updateWindowTitle()
