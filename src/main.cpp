@@ -111,11 +111,20 @@ int main(int argc, char** argv)
     // Connect to CyberGateCard (BlueToothDevice)
     BluetoothDevice *btDeviceInstance = btDevice();
 
-    if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
+    if ( btDeviceInstance->connectDevice() == true )
     {
+        if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
+        {
+         // openDataBase
+            mainWindow.openDatabase(QString(DB_FILE_DIR) + DB_FILE_NAME, QString(), QString());
 
-        // openDataBase
-          mainWindow.openDatabase(QString(DB_FILE_DIR) + DB_FILE_NAME, QString(), QString());
+        }
+        else
+        {
+            mainWindow.newDatabase();
+        }
+
+        btDeviceInstance->disconnectDevice();
     }
 
 

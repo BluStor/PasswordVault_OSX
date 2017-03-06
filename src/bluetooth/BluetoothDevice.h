@@ -6,9 +6,9 @@
 #include <QSerialPort>
 
 #define DEVICE_PORT_NAME_MACRO "cu.CYBERGATE-SerialPortSer"
-#define CURRENT_DATA_DIRECTORY "/apps/vault/data/"
+#define CURRENT_DATA_DIRECTORY "/passwordvault/"
 #define DB_FILE_NAME "db.kdbx"
-#define DB_FILE_DIR       "/data/"
+#define DB_FILE_DIR       "/passwordvault/"
 
 #define  PACKET_SIZE        512
 #define  HEADER_SIZE        3
@@ -43,7 +43,7 @@
 public:
     ~BluetoothDevice();
     static BluetoothDevice* instance();
-    void connectDevice();
+    bool connectDevice();
     void disconnectDevice();
     QByteArray sendCommand(QString cmdName , QString cmdParams);
     void readResponse();

@@ -39,8 +39,9 @@ BluetoothDevice* BluetoothDevice::instance()
 }
 
 // Opens connection to device
-void BluetoothDevice::connectDevice()
+bool BluetoothDevice::connectDevice()
 {
+    bool connectionSuccessful = false ;
     if(m_serialPort == NULL)
     {
 
@@ -57,6 +58,7 @@ void BluetoothDevice::connectDevice()
                  m_serialPort->setDataBits( QSerialPort::Data8 ) )
             {
                 qDebug()<<"Parameters set successfully!";
+                connectionSuccessful = true ;
             }
             else
             {
@@ -72,6 +74,8 @@ void BluetoothDevice::connectDevice()
             m_serialPort->clearError();
         }
     }
+
+    return connectionSuccessful ;
 }
 
 void BluetoothDevice::disconnectDevice()
@@ -402,7 +406,7 @@ void BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByt
             QDateTime time = QDateTime::currentDateTime();
             QString sTime = time.toString("yyyyMMddhhmmss");
 
-            QByteArray srftResponseData = sendCommand("SRFT", sTime+ " " + "/data/" + fileName);
+            QByteArray srftResponseData = sendCommand("SRFT", sTime+ " " + DB_FILE_DIR + fileName);
 
             if(srftResponseData.isEmpty()==true)
             {
@@ -668,7 +672,7 @@ bool BluetoothDevice::checkIfFileExists(QString path, QString fileName)
         }
         else
         {
-            if(finalStatusCode)
+            if(finalStatusCode != PATH_NOT_FOUND)
             {
                 QMessageBox::critical(NULL, "Error " , "LIST command failed. Error code: "+ QString::number(finalStatusCode ));
 

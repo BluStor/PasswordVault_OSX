@@ -158,7 +158,7 @@ void DatabaseTabWidget::openDatabase(const QString& fileName, const QString& pw,
 
 
 
-      Database* db = new Database();
+    Database* db = new Database();
     dbStruct.dbWidget = new DatabaseWidget(db, this);
     dbStruct.lockFile = NULL;
     dbStruct.saveToFilename = true;
@@ -326,8 +326,9 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
 
 bool DatabaseTabWidget::saveDatabaseAs(Database* db)
 {
+
     DatabaseManagerStruct& dbStruct = m_dbList[db];
-    QString oldFileName;
+    /*  QString oldFileName;
     if (dbStruct.saveToFilename) {
         oldFileName = dbStruct.filePath;
     }
@@ -392,23 +393,50 @@ bool DatabaseTabWidget::saveDatabaseAs(Database* db)
 
         // refresh fileinfo since the file didn't exist before
         fileInfo.refresh();
+*/
 
-        dbStruct.modified = false;
-        dbStruct.saveToFilename = true;
-        dbStruct.readOnly = false;
-        dbStruct.filePath = fileInfo.absoluteFilePath();
-        dbStruct.canonicalFilePath = fileInfo.canonicalFilePath();
-        dbStruct.fileName = fileInfo.fileName();
-        dbStruct.dbWidget->updateFilename(dbStruct.filePath);
-        delete dbStruct.lockFile;
-        dbStruct.lockFile = lockFile.take();
-        updateTabName(db);
-        updateLastDatabases(dbStruct.filePath);
-        return true;
+
+
+    dbStruct.lockFile = NULL;
+    dbStruct.saveToFilename = true;
+
+    dbStruct.filePath = DB_FILE_DIR + QString(DB_FILE_NAME);
+    dbStruct.canonicalFilePath =  dbStruct.filePath ;
+    dbStruct.fileName = DB_FILE_NAME;
+
+
+    QBuffer saveFile ;
+
+    if (saveFile.open(QIODevice::ReadWrite)) {
+        m_writer.writeDatabase(&saveFile, db);
+        if (m_writer.hasError()) {
+            MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
+                                 + m_writer.errorString());
+            return false;
+        }
+
+
+        BluetoothDevice *instance = btDevice();
+        instance->connectDevice();
+        instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data());
+        instance->disconnectDevice();
+
+
     }
     else {
+        MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
+                             + saveFile.errorString());
         return false;
     }
+
+    dbStruct.modified = false;
+    dbStruct.saveToFilename = true;
+
+    dbStruct.dbWidget->updateFilename(dbStruct.filePath);
+    updateTabName(db);
+    updateLastDatabases(dbStruct.filePath);
+    return true;
+
 }
 
 bool DatabaseTabWidget::closeDatabase(int index)

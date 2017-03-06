@@ -278,6 +278,13 @@ void MainWindow::openDatabase(const QString& fileName, const QString& pw, const 
     m_ui->tabWidget->openDatabase(fileName, pw, keyFile);
 }
 
+
+void MainWindow::newDatabase()
+{
+    m_ui->tabWidget->newDatabase();
+}
+
+
 void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
 {
     bool inDatabaseTabWidget = (m_ui->stackedWidget->currentIndex() == 0);
