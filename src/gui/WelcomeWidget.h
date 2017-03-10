@@ -31,7 +31,7 @@ class WelcomeWidget : public QWidget
 public:
     explicit WelcomeWidget(QWidget* parent = nullptr);
     ~WelcomeWidget();
-
+    void updateWindowData(int value , QString text) ;
 private:
     const QScopedPointer<Ui::WelcomeWidget> m_ui;
 };

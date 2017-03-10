@@ -93,14 +93,34 @@ void DatabaseTabWidget::toggleTabbar()
 // ND - make changes here
 void DatabaseTabWidget::newDatabase()
 {
-    DatabaseManagerStruct dbStruct;
-    Database* db = new Database();
-    db->rootGroup()->setName(tr("Root"));
-    dbStruct.dbWidget = new DatabaseWidget(db, this);
+    bool doContinue = false ;
 
-    insertDatabase(db, dbStruct);
+    BluetoothDevice *btDeviceInstance = btDevice();
 
-    dbStruct.dbWidget->switchToMasterKeyChange();
+    if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "New Database", "You already have a database file. Are you sure you want to lose all your passwords and create a new password database?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            doContinue = true ;
+        }
+    }
+    else
+    {
+        doContinue = true ;
+    }
+    if(doContinue)
+    {
+        DatabaseManagerStruct dbStruct;
+        Database* db = new Database();
+        db->rootGroup()->setName(tr("Root"));
+        dbStruct.dbWidget = new DatabaseWidget(db, this);
+
+        insertDatabase(db, dbStruct);
+
+        dbStruct.dbWidget->switchToMasterKeyChange();
+    }
 }
 
 
@@ -298,15 +318,16 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
 
 
            BluetoothDevice *instance = btDevice();
-           instance->connectDevice();
-           instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data());
-           instance->disconnectDevice();
 
-            //if (!saveFile.close()) {
-                //MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
-                 //                    + saveFile.errorString());
-                //return false;
-           // }
+           if(instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data()) == false)
+           {
+               MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
+                                    + saveFile.errorString());
+               return false;
+           }
+
+
+
         }
         else {
             MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
@@ -417,9 +438,13 @@ bool DatabaseTabWidget::saveDatabaseAs(Database* db)
 
 
         BluetoothDevice *instance = btDevice();
-        instance->connectDevice();
-        instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data());
-        instance->disconnectDevice();
+
+        if(instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data()) == false)
+        {
+            MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
+                                 + saveFile.errorString());
+            return false;
+        }
 
 
     }

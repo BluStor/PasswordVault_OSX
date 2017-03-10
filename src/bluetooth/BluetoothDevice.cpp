@@ -9,6 +9,7 @@
 
 #include "BluetoothDevice.h"
 #include "gui/MessageBox.h"
+#include "bluetooth/bluetoothdevicemac.h"
 
 BluetoothDevice* BluetoothDevice::m_instance(nullptr);
 
@@ -41,38 +42,59 @@ BluetoothDevice* BluetoothDevice::instance()
 // Opens connection to device
 bool BluetoothDevice::connectDevice()
 {
+
     bool connectionSuccessful = false ;
-    if(m_serialPort == NULL)
+
+    if( isBluetoothOn())
     {
-
-        m_serialPort = new QSerialPort( DEVICE_PORT_NAME_MACRO );
-
-        // Open serial port to device
-        if ((m_serialPort->isOpen() == false)&& m_serialPort->open( QSerialPort::ReadWrite ) )
+        if(isCardPaired())
         {
-            // Set Parameters for device
-            if ( m_serialPort->setBaudRate( QSerialPort::Baud115200 ) &&
-                 m_serialPort->setStopBits( QSerialPort::OneStop ) &&
-                 m_serialPort->setParity( QSerialPort::NoParity ) &&
-                 m_serialPort->setFlowControl(QSerialPort::NoFlowControl ) &&
-                 m_serialPort->setDataBits( QSerialPort::Data8 ) )
+
+            if(m_serialPort == NULL)
             {
-                qDebug()<<"Parameters set successfully!";
-                connectionSuccessful = true ;
-            }
-            else
-            {
-                qDebug()<<  m_serialPort->errorString();
-                QMessageBox::critical(NULL, "Error: Set serial port parameters failed.", m_serialPort->errorString());
-                m_serialPort->clearError();
+
+                m_serialPort = new QSerialPort( DEVICE_PORT_NAME_MACRO );
+
+                // Open serial port to device
+                if ((m_serialPort->isOpen() == false)&& m_serialPort->open( QSerialPort::ReadWrite ) )
+                {
+                    // Set Parameters for device
+                    if ( m_serialPort->setBaudRate( QSerialPort::Baud115200 ) &&
+                         m_serialPort->setStopBits( QSerialPort::OneStop ) &&
+                         m_serialPort->setParity( QSerialPort::NoParity ) &&
+                         m_serialPort->setFlowControl(QSerialPort::NoFlowControl ) &&
+                         m_serialPort->setDataBits( QSerialPort::Data8 ) )
+                    {
+                        qDebug()<<"Parameters set successfully!";
+                        connectionSuccessful = true ;
+                    }
+                    else
+                    {
+                        qDebug()<<  m_serialPort->errorString();
+                        QMessageBox::critical(NULL, "Error: Set serial port parameters failed.", m_serialPort->errorString());
+                        m_serialPort->clearError();
+                    }
+                }
+                else
+                {
+                    qDebug()<<  m_serialPort->errorString();
+                    QMessageBox::critical(NULL, "Error: Open port failed.", m_serialPort->errorString());
+                    m_serialPort->clearError();
+                }
             }
         }
         else
         {
-            qDebug()<<  m_serialPort->errorString();
-            QMessageBox::critical(NULL, "Error: Open port failed.", m_serialPort->errorString());
-            m_serialPort->clearError();
+            // Card is not paired
+            QMessageBox::critical(NULL, "Card is not paired.", "Please pair card with system and retry.");
+            m_serialPort = NULL ;
         }
+    }
+    else
+    {
+        // Bluetooth is disabled
+         QMessageBox::critical(NULL, "Bluetooth is disabled.", "Please enable bluetooth and retry.");
+         m_serialPort = NULL ;
     }
 
     return connectionSuccessful ;
@@ -81,7 +103,7 @@ bool BluetoothDevice::connectDevice()
 void BluetoothDevice::disconnectDevice()
 {
     // Close port if its still opern
-    if( m_serialPort && m_serialPort->isOpen())
+     if( m_serialPort && m_serialPort->isOpen())
     {
         m_serialPort->close();
         m_serialPort = NULL ;
@@ -339,114 +361,132 @@ void BluetoothDevice::deleteFile(QString path)
 }
 
 // this function creates a file 'fileName' having 'data' content at path 'onCardPath'
-void BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByteArray data)
+bool BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByteArray data)
 {
+    bool returnValue = false ;
+    bool deviceOpened = false ;
+
     if((m_serialPort == NULL) || m_serialPort->isOpen() == false)
     {
-        connectDevice();
+        deviceOpened = connectDevice() ;
     }
 
-    // 1. Send Store Command first
-    QByteArray response ;
-    QString cmd = QString("STOR " + onCardPath + fileName + "\r\n");
+    if(m_serialPort)
+        deviceOpened = m_serialPort->isOpen() ;
 
-    qDebug()<< QTime::currentTime() << cmd << "\n";
-
-    QByteArray cmdBytes = cmd.toUtf8() ;
-    QByteArray dataPacket = QByteArray(cmdBytes.size()+ 5, 0);
-    short packetSize = (short)cmdBytes.size() +5;
-    // Add header
-    dataPacket[0] = (char)(COMMAND_CHANNEL & 0xff);
-    dataPacket[1] = (char) (packetSize >> 8);
-    dataPacket[2] = (char) (packetSize & 0xff);
-    // Add data
-    for (int i = 0; i < cmdBytes.size(); i++) {
-        dataPacket[i + 3] = cmdBytes[i];
-    }
-    // Add checksum
-    dataPacket[dataPacket.size() - 2] = MOST_SIGNIFICANT_BIT;
-    dataPacket[dataPacket.size() - 1] = LEAST_SIGNIFICANT_BIT;
-
-    m_serialPort->write(dataPacket, dataPacket.size());
-    m_serialPort->waitForBytesWritten(UPLOAD_DELAY_MILLIS);
-    m_serialPort->waitForReadyRead(UPLOAD_DELAY_MILLIS) ;
-
-    QByteArray requestData = m_serialPort->readAll();
-
-    qDebug()<< QTime::currentTime() <<" Response:" << requestData ;
-
-    QList<int>  statusCodes;
-    QList<QByteArray> messages;
-    int finalStatusCode;
-    parseResponse(requestData, &statusCodes , &messages , &finalStatusCode);
-
-    if(finalStatusCode == FILE_STATUS_OK)
+    if(deviceOpened)
     {
-        data.append("\r\n");
+        // 1. Send Store Command first
+        QByteArray response ;
+        QString cmd = QString("STOR " + onCardPath + fileName + "\r\n");
 
-        // 2. Write file
+        qDebug()<< QTime::currentTime() << cmd << "\n";
 
-        qDebug() << "\n\n SIZE :" << data.size() << "\n\n" ;
-        writeToDevice(data);
+        QByteArray cmdBytes = cmd.toUtf8() ;
+        QByteArray dataPacket = QByteArray(cmdBytes.size()+ 5, 0);
+        short packetSize = (short)cmdBytes.size() +5;
+        // Add header
+        dataPacket[0] = (char)(COMMAND_CHANNEL & 0xff);
+        dataPacket[1] = (char) (packetSize >> 8);
+        dataPacket[2] = (char) (packetSize & 0xff);
+        // Add data
+        for (int i = 0; i < cmdBytes.size(); i++) {
+            dataPacket[i + 3] = cmdBytes[i];
+        }
+        // Add checksum
+        dataPacket[dataPacket.size() - 2] = MOST_SIGNIFICANT_BIT;
+        dataPacket[dataPacket.size() - 1] = LEAST_SIGNIFICANT_BIT;
 
-        m_serialPort->waitForReadyRead(12000) ;
-        requestData = m_serialPort->readAll();
+        m_serialPort->write(dataPacket, dataPacket.size());
+        m_serialPort->waitForBytesWritten(UPLOAD_DELAY_MILLIS);
+        m_serialPort->waitForReadyRead(UPLOAD_DELAY_MILLIS) ;
 
-        qDebug()<< QTime::currentTime() << "Response 2:" << requestData ;
+        QByteArray requestData = m_serialPort->readAll();
 
-        finalStatusCode = 0 ;
-        statusCodes.erase(statusCodes.begin(), statusCodes.end());
-        messages.erase(messages.begin(), messages.end());
+        qDebug()<< QTime::currentTime() <<" Response:" << requestData ;
+
+        QList<int>  statusCodes;
+        QList<QByteArray> messages;
+        int finalStatusCode;
         parseResponse(requestData, &statusCodes , &messages , &finalStatusCode);
 
-        if(finalStatusCode == FILE_ACTION_SUCCESS)
+        if(finalStatusCode == FILE_STATUS_OK)
         {
-            // 3. send SFRT
+            finalStatusCode = 0 ;
 
-            QDateTime time = QDateTime::currentDateTime();
-            QString sTime = time.toString("yyyyMMddhhmmss");
+            data.append("\r\n");
 
-            QByteArray srftResponseData = sendCommand("SRFT", sTime+ " " + DB_FILE_DIR + fileName);
+            // 2. Write file
 
-            if(srftResponseData.isEmpty()==true)
+            qDebug() << "\n\n SIZE :" << data.size() << "\n\n" ;
+            writeToDevice(data);
+
+            m_serialPort->waitForReadyRead(12000) ;
+            requestData = m_serialPort->readAll();
+
+            qDebug()<< QTime::currentTime() << "Response 2:" << requestData ;
+
+
+            statusCodes.erase(statusCodes.begin(), statusCodes.end());
+            messages.erase(messages.begin(), messages.end());
+            parseResponse(requestData, &statusCodes , &messages , &finalStatusCode);
+
+            if(finalStatusCode == FILE_ACTION_SUCCESS)
             {
-                qDebug() << QTime::currentTime()<<"SRFT response data is empty .... so waiting here for 30 more seconds ";
-                m_serialPort->waitForReadyRead(30000) ;
-                srftResponseData = m_serialPort->readAll();
-                qDebug() << QTime::currentTime()<< "srftResponseData:" << srftResponseData ;
-            }
+                // 3. send SFRT
 
-        }
-        else
-        {
-            QString errorString = QString("STOR command failed.");
-            if(finalStatusCode == 0)
-            {
-                if(m_serialPort->error())
+                QDateTime time = QDateTime::currentDateTime();
+                QString sTime = time.toString("yyyyMMddhhmmss");
+
+                QByteArray srftResponseData = sendCommand("SRFT", sTime+ " " + DB_FILE_DIR + fileName);
+
+                if(srftResponseData.isEmpty()==true)
                 {
-                    errorString += "Error :" + m_serialPort->errorString();
+                    qDebug() << QTime::currentTime()<<"SRFT response data is empty .... so waiting here for 30 more seconds ";
+                    m_serialPort->waitForReadyRead(30000) ;
+                    srftResponseData = m_serialPort->readAll();
+                    qDebug() << QTime::currentTime()<< "srftResponseData:" << srftResponseData ;
+
                 }
 
+                if((srftResponseData.isEmpty() == false)&&(srftResponseData.contains(QString(DB_FILE_DIR + QString(DB_FILE_NAME)).toLatin1())))
+                {
+                    returnValue = true ;
+                }
             }
             else
             {
-                errorString += "Error :" + QString::number(finalStatusCode);
-            }
+                QString errorString = QString("STOR command failed.");
+                if(finalStatusCode == 0)
+                {
+                    if(m_serialPort->error())
+                    {
+                        errorString += "Error :" + m_serialPort->errorString();
+                    }
 
+                }
+                else
+                {
+                    errorString += "Error :" + QString::number(finalStatusCode);
+                }
+
+                QMessageBox::critical(NULL, "Error " , "STOR command failed. Error code: "+ QString::number(finalStatusCode ));
+
+            }
+        }
+        else
+        {
             QMessageBox::critical(NULL, "Error " , "STOR command failed. Error code: "+ QString::number(finalStatusCode ));
 
         }
-    }
-    else
-    {
-        QMessageBox::critical(NULL, "Error " , "STOR command failed. Error code: "+ QString::number(finalStatusCode ));
 
+        if(m_serialPort && m_serialPort->isOpen())
+        {
+            disconnectDevice();
+        }
     }
 
-    if(m_serialPort && m_serialPort->isOpen())
-    {
-         disconnectDevice();
-    }
+    return returnValue;
 
 }
 
@@ -461,30 +501,30 @@ void BluetoothDevice::writeToDevice(QByteArray data)
     {
         if(size>(PACKET_SIZE))
         {
-             short packetSize = PACKET_SIZE + 5;
-             QByteArray dataPacket = QByteArray(packetSize , 0);
-             // Create Data Packet
-             dataPacket[0] = (char)(DATA_CHANNEL & 0xff);
-             dataPacket[1] = (char) (packetSize >> 8);
-             dataPacket[2] = (char) (packetSize & 0xff);
-             // Add data
-             for (int i = 0; i < (PACKET_SIZE ); i++) {
-                 dataPacket[i+3] = data[i+startIndex];
-             }
-             // Add checksum
-             dataPacket[dataPacket.size() - 2] = MOST_SIGNIFICANT_BIT;
-             dataPacket[dataPacket.size() - 1] = LEAST_SIGNIFICANT_BIT;
+            short packetSize = PACKET_SIZE + 5;
+            QByteArray dataPacket = QByteArray(packetSize , 0);
+            // Create Data Packet
+            dataPacket[0] = (char)(DATA_CHANNEL & 0xff);
+            dataPacket[1] = (char) (packetSize >> 8);
+            dataPacket[2] = (char) (packetSize & 0xff);
+            // Add data
+            for (int i = 0; i < (PACKET_SIZE ); i++) {
+                dataPacket[i+3] = data[i+startIndex];
+            }
+            // Add checksum
+            dataPacket[dataPacket.size() - 2] = MOST_SIGNIFICANT_BIT;
+            dataPacket[dataPacket.size() - 1] = LEAST_SIGNIFICANT_BIT;
 
-             errC = m_serialPort->write(dataPacket , packetSize);
+            errC = m_serialPort->write(dataPacket , packetSize);
 
-             if(errC != packetSize)
-             {
-                 QMessageBox::critical(NULL, "Error " , "Write operation failed." + m_serialPort->errorString());
+            if(errC != packetSize)
+            {
+                QMessageBox::critical(NULL, "Error " , "Write operation failed." + m_serialPort->errorString());
 
-             }
+            }
 
-             size= size-PACKET_SIZE  ;
-             startIndex = startIndex + PACKET_SIZE ;
+            size= size-PACKET_SIZE  ;
+            startIndex = startIndex + PACKET_SIZE ;
         }
         else
         {
@@ -682,7 +722,7 @@ bool BluetoothDevice::checkIfFileExists(QString path, QString fileName)
     }
     else
     {
-        if(m_serialPort->error() !=0)
+        if(m_serialPort && (m_serialPort->error() !=0))
         {
             qDebug()<<  m_serialPort->errorString();
         }
@@ -696,3 +736,24 @@ bool BluetoothDevice::checkIfFileExists(QString path, QString fileName)
     return fileExists;
 }
 
+bool BluetoothDevice::isBluetoothOn()
+{
+    QBluetoothLocalDevice localDevice ;
+
+    if(localDevice.isValid() && ( localDevice.hostMode() != QBluetoothLocalDevice::HostPoweredOff))
+    {
+        return true ;
+    }
+
+    return false ;
+}
+
+bool BluetoothDevice::isCardPaired()
+{
+    BluetoothDeviceMac btDeviceMac ;
+
+    if(btDeviceMac.ifCybergateCardIsPaired())
+        return true ;
+
+    return false ;
+}

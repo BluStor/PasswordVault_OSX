@@ -278,6 +278,10 @@ void MainWindow::openDatabase(const QString& fileName, const QString& pw, const 
     m_ui->tabWidget->openDatabase(fileName, pw, keyFile);
 }
 
+void MainWindow::updateWelcomeWidget(int value, QString text)
+{
+    m_ui->welcomeWidget->updateWindowData(value, text);
+}
 
 void MainWindow::newDatabase()
 {

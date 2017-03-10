@@ -154,6 +154,9 @@ find_package(Qt5Widgets       5.2 REQUIRED)
 find_package(Qt5Test          5.2 REQUIRED)
 find_package(Qt5LinguistTools 5.2 REQUIRED)
 find_package(Qt5SerialPort 5.2 REQUIRED)
+find_package(Qt5Bluetooth 5.2 REQUIRED)
+
+
 set(CMAKE_AUTOMOC ON)
 
 # Debian sets the the build type to None for package builds.

@@ -82,8 +82,15 @@
       </widget>
       <widget class="QWidget" name="pageWelcome">
        <layout class="QVBoxLayout" name="verticalLayout_5">
-        <item>
-         <widget class="WelcomeWidget" name="welcomeWidget" native="true"/>
+        <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="WelcomeWidget" name="welcomeWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>240</width>
+            <height>120</height>
+           </size>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

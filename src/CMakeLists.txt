@@ -127,6 +127,7 @@ set(keepassx_SOURCES
     streams/StoreDataStream.cpp
     streams/SymmetricCipherStream.cpp
     bluetooth/BluetoothDevice.cpp
+    bluetooth/bluetoothdevicemac.mm
 )
 
 set(keepassx_SOURCES_MAINEXE
@@ -163,18 +164,41 @@ endif()
 qt5_wrap_ui(keepassx_SOURCES ${keepassx_FORMS})
 
 add_library(keepassx_core STATIC ${keepassx_SOURCES})
+
+macro(ADD_OSX_FRAMEWORK fwname target)
+    find_library(FRAMEWORK_${fwname}
+    NAMES ${fwname}
+    PATHS ${CMAKE_OSX_SYSROOT}/System/Library
+    PATH_SUFFIXES Frameworks
+    NO_DEFAULT_PATH)
+    if( ${FRAMEWORK_${fwname}} STREQUAL FRAMEWORK_${fwname}-NOTFOUND)
+        MESSAGE(ERROR ": Framework ${fwname} not found")
+    else()
+       # TARGET_LINK_LIBRARIES(${target} PUBLIC "${FRAMEWORK_${fwname}}/${fwname}")
+        MESSAGE(STATUS "Framework ${fwname} found at ${FRAMEWORK_${fwname}}")
+    endif()
+endmacro(ADD_OSX_FRAMEWORK)
+
+ADD_OSX_FRAMEWORK(Foundation ${PROGNAME})
+ADD_OSX_FRAMEWORK(IOBluetooth ${PROGNAME})
+
 set_target_properties(keepassx_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
-target_link_libraries(keepassx_core Qt5::Core Qt5::Concurrent Qt5::Widgets  Qt5::SerialPort)
+target_link_libraries(keepassx_core Qt5::Core Qt5::Concurrent Qt5::Widgets  Qt5::SerialPort Qt5::Bluetooth  "-framework Foundation" "-framework IOBluetooth" )
 
 add_executable(${PROGNAME} WIN32 MACOSX_BUNDLE ${keepassx_SOURCES_MAINEXE})
+
+
 target_link_libraries(${PROGNAME}
                       keepassx_core
                       Qt5::Core
                       Qt5::Concurrent
                       Qt5::Widgets
                       Qt5::SerialPort
+                      Qt5::Bluetooth
                       ${GCRYPT_LIBRARIES}
-                      ${ZLIB_LIBRARIES})
+                      ${ZLIB_LIBRARIES}
+                      "-framework Foundation"
+                      "-framework IOBluetooth")
 
 set_target_properties(${PROGNAME} PROPERTIES ENABLE_EXPORTS ON)
 
@@ -205,13 +229,13 @@ if(APPLE)
   include(CPack)
 
   if(NOT DEFINED QT_BINARY_DIR)
-      set(QT_BINARY_DIR "/usr/local/opt/qt5/bin" CACHE PATH "QT binary folder")
-  endif()
-  add_custom_command(TARGET ${PROGNAME}
-                     POST_BUILD
-                     COMMAND ${QT_BINARY_DIR}/macdeployqt ${PROGNAME}.app
-                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/src
-                     COMMENT "Deploying app bundle")
+       set(QT_BINARY_DIR "/usr/local/opt/qt5/bin" CACHE PATH "QT binary folder")
+   endif()
+   add_custom_command(TARGET ${PROGNAME}
+                      POST_BUILD
+                      COMMAND ${QT_BINARY_DIR}/macdeployqt ${PROGNAME}.app
+                      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/src
+                      COMMENT "Deploying app bundle")
 
  
 endif()

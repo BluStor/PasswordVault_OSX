@@ -23,7 +23,39 @@ WelcomeWidget::WelcomeWidget(QWidget* parent)
     , m_ui(new Ui::WelcomeWidget())
 {
     m_ui->setupUi(this);
+    m_ui->labelBT->setText("Welcome!");
 }
+
+void WelcomeWidget::updateWindowData(int value , QString text)
+{
+
+    if(value == 0)
+    {
+       m_ui->labelBT->setText(text);
+       m_ui->progressBar->setValue(value);
+       m_ui->progressBar->valueChanged(value);
+       m_ui->progressBar->setVisible(false);
+    }
+    else  if(value == 100)
+    {
+         m_ui->labelBT->setText("Welcome!");
+         m_ui->progressBar->setValue(0);
+         m_ui->progressBar->valueChanged(0);
+         m_ui->progressBar->setVisible(false);
+    }
+    else
+    {
+        if(text.isNull()==false)
+             m_ui->labelBT->setText(text);
+        m_ui->progressBar->setValue(value);
+        m_ui->progressBar->valueChanged(value);
+         m_ui->progressBar->setVisible(true);
+    }
+
+    QApplication::processEvents( QEventLoop::ExcludeUserInputEvents );
+
+}
+
 
 WelcomeWidget::~WelcomeWidget()
 {

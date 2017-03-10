@@ -30,6 +30,13 @@
 #include "gui/MessageBox.h"
 #include "bluetooth/BluetoothDevice.h"
 
+#define PROGRESS_INIT 15
+#define PROGRESS_CHECK_BT_SETTINGS 30
+#define PROGRESS_CHECK_DB_FILE 45
+#define PROGRESS_OPEN_NEW_DB 60
+#define PROGRESS_COMPLETE   100
+
+
 int main(int argc, char** argv)
 {
 #ifdef QT_NO_DEBUG
@@ -86,6 +93,8 @@ int main(int argc, char** argv)
 
     MainWindow mainWindow;
     mainWindow.show();
+    mainWindow.updateWelcomeWidget(PROGRESS_INIT , "Opening database ... Please wait...");
+
     app.setMainWindow(&mainWindow);
 
     QObject::connect(&app, SIGNAL(openFile(QString)), &mainWindow, SLOT(openDatabase(QString)));
@@ -107,15 +116,19 @@ int main(int argc, char** argv)
     }
 
 
-
+    mainWindow.updateWelcomeWidget(PROGRESS_CHECK_BT_SETTINGS , NULL);
     // Connect to CyberGateCard (BlueToothDevice)
     BluetoothDevice *btDeviceInstance = btDevice();
 
     if ( btDeviceInstance->connectDevice() == true )
     {
+
+        mainWindow.updateWelcomeWidget(PROGRESS_CHECK_DB_FILE , NULL);
+
         if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
         {
-         // openDataBase
+            mainWindow.updateWelcomeWidget(PROGRESS_OPEN_NEW_DB , NULL);
+            // openDataBase
             mainWindow.openDatabase(QString(DB_FILE_DIR) + DB_FILE_NAME, QString(), QString());
 
         }
@@ -123,10 +136,15 @@ int main(int argc, char** argv)
         {
             mainWindow.newDatabase();
         }
+        mainWindow.updateWelcomeWidget(PROGRESS_COMPLETE , "Welcome!");
 
         btDeviceInstance->disconnectDevice();
     }
+    else
+    {
+        mainWindow.updateWelcomeWidget(0 , "Error ... Please retry.");
 
+    }
 
     return app.exec();
 }

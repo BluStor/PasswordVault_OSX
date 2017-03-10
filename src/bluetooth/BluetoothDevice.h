@@ -5,6 +5,8 @@
 #include <QString>
 #include <QSerialPort>
 
+#include <qbluetoothlocaldevice.h>
+
 #define DEVICE_PORT_NAME_MACRO "cu.CYBERGATE-SerialPortSer"
 #define CURRENT_DATA_DIRECTORY "/passwordvault/"
 #define DB_FILE_NAME "db.kdbx"
@@ -56,11 +58,13 @@ public:
     int getSerialPortError();
      void parseResponse(QByteArray response, QList<int> * statusCodes , QList<QByteArray>* messages , int* finalStatusCode);
      QByteArray dePacketizeStream(QByteArray inputStream , int* pFinalStatusCode);
-     void storeFileOnCard(QString onCardPath, QString fileName, QByteArray data);
+     bool storeFileOnCard(QString onCardPath, QString fileName, QByteArray data);
      QByteArray readFileFromCard(QString fileName);
      void listMemoryInfo(QString path);
      void deleteFile(QString path);
      void writeToDevice(QByteArray data) ;
+     bool isBluetoothOn();
+     bool isCardPaired();
 private Q_SLOTS:
     void reportSerialPortError();
    // void handleReadyRead();

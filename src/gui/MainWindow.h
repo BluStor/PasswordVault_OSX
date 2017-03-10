@@ -43,6 +43,7 @@ public Q_SLOTS:
     void openDatabase(const QString& fileName, const QString& pw = QString(),
                       const QString& keyFile = QString());
      void newDatabase();
+    void  updateWelcomeWidget(int data,QString text);
 
 protected:
      void closeEvent(QCloseEvent* event) override;
