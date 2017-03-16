@@ -62,7 +62,7 @@ public:
      QByteArray readFileFromCard(QString fileName);
      void listMemoryInfo(QString path);
      void deleteFile(QString path);
-     void writeToDevice(QByteArray data) ;
+     bool writeToDevice(QByteArray data) ;
      bool isBluetoothOn();
      bool isCardPaired();
 private Q_SLOTS:

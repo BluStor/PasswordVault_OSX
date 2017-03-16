@@ -102,8 +102,17 @@ void DatabaseOpenWidget::openDatabase()
 
     // ND QFile file(m_filename);
     BluetoothDevice *instance = btDevice();
-    instance->connectDevice();
-    QByteArray fileData = instance->readFileFromCard(QString(DB_FILE_DIR) + QString(DB_FILE_NAME));
+    QByteArray fileData ;
+
+    if( instance->connectDevice())
+    {
+
+        fileData = instance->readFileFromCard(QString(DB_FILE_DIR) + QString(DB_FILE_NAME));
+    }
+    else
+    {
+         return;
+    }
 
     QBuffer file(&fileData);
 
@@ -116,9 +125,6 @@ void DatabaseOpenWidget::openDatabase()
     if (m_db) {
         delete m_db;
     }
-
-
-
 
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));

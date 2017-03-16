@@ -35,7 +35,18 @@
 #include "gui/MessageBox.h"
 #include "bluetooth/BluetoothDevice.h"
 
+
 const QString MainWindow::BaseWindowTitle = "KeePassX";
+MainWindow* MainWindow::m_instance(nullptr);
+
+MainWindow* MainWindow::instance()
+{
+    if (!m_instance) {
+        m_instance = new MainWindow();
+    }
+
+    return m_instance;
+}
 
 MainWindow::MainWindow()
     : m_ui(new Ui::MainWindow())

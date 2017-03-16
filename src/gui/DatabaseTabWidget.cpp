@@ -38,6 +38,7 @@
 #include "gui/MessageBox.h"
 #include "gui/entry/EntryView.h"
 #include "gui/group/GroupView.h"
+#include "gui/MainWindow.h"
 #include "bluetooth/BluetoothDevice.h"
 
 DatabaseManagerStruct::DatabaseManagerStruct()
@@ -97,18 +98,21 @@ void DatabaseTabWidget::newDatabase()
 
     BluetoothDevice *btDeviceInstance = btDevice();
 
-    if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
+    if ( btDeviceInstance->connectDevice() == true )
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "New Database", "You already have a database file. Are you sure you want to lose all your passwords and create a new password database?",
-                                      QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
+        if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "New Database", "You already have a database file. Are you sure you want to lose all your passwords and create a new password database?",
+                                          QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes) {
+                doContinue = true ;
+            }
+        }
+        else
+        {
             doContinue = true ;
         }
-    }
-    else
-    {
-        doContinue = true ;
     }
     if(doContinue)
     {
@@ -135,6 +139,7 @@ void DatabaseTabWidget::openDatabase()
     if (!fileName.isEmpty()) {
         openDatabase(fileName);
     }
+
 }
 
 // ND - make changes here
@@ -153,26 +158,42 @@ void DatabaseTabWidget::openDatabase(const QString& fileName, const QString& pw,
 
     BluetoothDevice *btDeviceInstance = btDevice();
 
-    if(btDeviceInstance->checkIfFileExists(fileName, NULL))
+    MainWindow* mainWindow = mainWindowInstance();
+    mainWindow->show();
+    mainWindow->updateWelcomeWidget(PROGRESS_INIT , "Opening database ... Please wait...");
+
+
+    if ( btDeviceInstance->connectDevice() == true )
     {
 
-        // openDataBase
+        mainWindow->updateWelcomeWidget(PROGRESS_CHECK_DB_FILE , NULL);
 
+        if(btDeviceInstance->checkIfFileExists(fileName, NULL))
+        {
 
-        QHashIterator<Database*, DatabaseManagerStruct> i(m_dbList);
-        while (i.hasNext()) {
-            i.next();
-            if (i.value().canonicalFilePath == fileName) {
-                setCurrentIndex(databaseIndex(i.key()));
-                return;
+            // openDataBase
+
+            QHashIterator<Database*, DatabaseManagerStruct> i(m_dbList);
+            while (i.hasNext()) {
+                i.next();
+                if (i.value().canonicalFilePath == fileName) {
+                    setCurrentIndex(databaseIndex(i.key()));
+                    return;
+                }
             }
+        }
+        else
+        {
+            MessageBox::warning(this, tr("Error"), tr("Unable to open the database."));
+             mainWindow->updateWelcomeWidget(0 , "Welcome!");
+            return;
+
         }
 
     }
     else
     {
-        // ND : TODO checkif any error message can be included ?
-        MessageBox::warning(this, tr("Error"), tr("Unable to open the database."));
+        mainWindow->updateWelcomeWidget(0 , "Error ... Please retry.");
         return;
     }
 
@@ -197,6 +218,10 @@ void DatabaseTabWidget::openDatabase(const QString& fileName, const QString& pw,
     else {
         dbStruct.dbWidget->switchToOpenDatabase(dbStruct.filePath);
     }
+
+    MainWindow *mWindow = MainWindow::instance() ;
+    mWindow->updateWelcomeWidget(100, "Welcome!");
+
 }
 
 void DatabaseTabWidget::importKeePass1Database()
@@ -304,39 +329,42 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
     DatabaseManagerStruct& dbStruct = m_dbList[db];
 
     if (dbStruct.saveToFilename) {
-        //QSaveFile saveFile(dbStruct.canonicalFilePath);
+        if(dbStruct.modified )
+        {
+            //QSaveFile saveFile(dbStruct.canonicalFilePath);
 
-        QBuffer saveFile ;
-       // if (saveFile.open(QIODevice::WriteOnly)) {
-         if (saveFile.open(QIODevice::ReadWrite)) {
-            m_writer.writeDatabase(&saveFile, db);
-            if (m_writer.hasError()) {
+            QBuffer saveFile ;
+            // if (saveFile.open(QIODevice::WriteOnly)) {
+            if (saveFile.open(QIODevice::ReadWrite)) {
+                m_writer.writeDatabase(&saveFile, db);
+                if (m_writer.hasError()) {
+                    MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
+                                         + m_writer.errorString());
+                    return false;
+                }
+
+
+                BluetoothDevice *instance = btDevice();
+
+                if(instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data()) == false)
+                {
+                    MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
+                                         + saveFile.errorString());
+                    return false;
+                }
+
+
+
+            }
+            else {
                 MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
-                                     + m_writer.errorString());
+                                     + saveFile.errorString());
                 return false;
             }
 
-
-           BluetoothDevice *instance = btDevice();
-
-           if(instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data()) == false)
-           {
-               MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
-                                    + saveFile.errorString());
-               return false;
-           }
-
-
-
+            dbStruct.modified = false;
+            updateTabName(db);
         }
-        else {
-            MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
-                                 + saveFile.errorString());
-            return false;
-        }
-
-        dbStruct.modified = false;
-        updateTabName(db);
         return true;
     }
     else {

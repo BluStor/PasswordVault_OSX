@@ -30,11 +30,7 @@
 #include "gui/MessageBox.h"
 #include "bluetooth/BluetoothDevice.h"
 
-#define PROGRESS_INIT 15
-#define PROGRESS_CHECK_BT_SETTINGS 30
-#define PROGRESS_CHECK_DB_FILE 45
-#define PROGRESS_OPEN_NEW_DB 60
-#define PROGRESS_COMPLETE   100
+
 
 
 int main(int argc, char** argv)
@@ -91,18 +87,18 @@ int main(int argc, char** argv)
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
 
-    MainWindow mainWindow;
-    mainWindow.show();
-    mainWindow.updateWelcomeWidget(PROGRESS_INIT , "Opening database ... Please wait...");
+    MainWindow* mainWindow = mainWindowInstance();
+    mainWindow->show();
+    mainWindow->updateWelcomeWidget(PROGRESS_INIT , "Opening database ... Please wait...");
 
-    app.setMainWindow(&mainWindow);
+    app.setMainWindow(mainWindow);
 
-    QObject::connect(&app, SIGNAL(openFile(QString)), &mainWindow, SLOT(openDatabase(QString)));
+    QObject::connect(&app, SIGNAL(openFile(QString)), mainWindow, SLOT(openDatabase(QString)));
 
     if (!args.isEmpty()) {
         QString filename = args[0];
         if (!filename.isEmpty() && QFile::exists(filename)) {
-            mainWindow.openDatabase(filename, QString(), parser.value(keyfileOption));
+            mainWindow->openDatabase(filename, QString(), parser.value(keyfileOption));
         }
     }
 
@@ -110,39 +106,39 @@ int main(int argc, char** argv)
         const QStringList filenames = config()->get("LastOpenedDatabases").toStringList();
         for (const QString& filename : filenames) {
             if (!filename.isEmpty() && QFile::exists(filename)) {
-                mainWindow.openDatabase(filename, QString(), QString());
+                mainWindow->openDatabase(filename, QString(), QString());
             }
         }
     }
 
 
-    mainWindow.updateWelcomeWidget(PROGRESS_CHECK_BT_SETTINGS , NULL);
+    mainWindow->updateWelcomeWidget(PROGRESS_CHECK_BT_SETTINGS , NULL);
     // Connect to CyberGateCard (BlueToothDevice)
     BluetoothDevice *btDeviceInstance = btDevice();
 
     if ( btDeviceInstance->connectDevice() == true )
     {
 
-        mainWindow.updateWelcomeWidget(PROGRESS_CHECK_DB_FILE , NULL);
+        mainWindow->updateWelcomeWidget(PROGRESS_CHECK_DB_FILE , NULL);
 
         if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
         {
-            mainWindow.updateWelcomeWidget(PROGRESS_OPEN_NEW_DB , NULL);
+            mainWindow->updateWelcomeWidget(PROGRESS_OPEN_NEW_DB , NULL);
             // openDataBase
-            mainWindow.openDatabase(QString(DB_FILE_DIR) + DB_FILE_NAME, QString(), QString());
+            mainWindow->openDatabase(QString(DB_FILE_DIR) + DB_FILE_NAME, QString(), QString());
 
         }
         else
         {
-            mainWindow.newDatabase();
+            mainWindow->newDatabase();
         }
-        mainWindow.updateWelcomeWidget(PROGRESS_COMPLETE , "Welcome!");
+        mainWindow->updateWelcomeWidget(PROGRESS_COMPLETE , "Welcome!");
 
         btDeviceInstance->disconnectDevice();
     }
     else
     {
-        mainWindow.updateWelcomeWidget(0 , "Error ... Please retry.");
+        mainWindow->updateWelcomeWidget(0 , "Error ... Please retry.");
 
     }
 

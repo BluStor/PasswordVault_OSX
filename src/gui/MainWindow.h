@@ -25,6 +25,12 @@
 #include "core/SignalMultiplexer.h"
 #include "gui/DatabaseWidget.h"
 
+#define PROGRESS_INIT 15
+#define PROGRESS_CHECK_BT_SETTINGS 30
+#define PROGRESS_CHECK_DB_FILE 45
+#define PROGRESS_OPEN_NEW_DB 60
+#define PROGRESS_COMPLETE   100
+
 namespace Ui {
     class MainWindow;
 }
@@ -36,7 +42,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow();
+   // MainWindow();
+    static MainWindow* instance();
     ~MainWindow();
 
 public Q_SLOTS:
@@ -93,6 +100,12 @@ private:
     QSystemTrayIcon* m_trayIcon;
 
     Q_DISABLE_COPY(MainWindow)
+    explicit MainWindow();
+    static MainWindow* m_instance;
 };
 
+
+inline MainWindow* mainWindowInstance() {
+return MainWindow::instance();
+}
 #endif // KEEPASSX_MAINWINDOW_H
