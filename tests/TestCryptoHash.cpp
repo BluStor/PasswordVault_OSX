@@ -35,7 +35,7 @@ void TestCryptoHash::test()
     QCOMPARE(cryptoHash1.result(),
              QByteArray::fromHex("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
 
-    QByteArray source2 = QString("KeePassX").toLatin1();
+    QByteArray source2 = QString("PasswordVault").toLatin1();
     QByteArray result2 = CryptoHash::hash(source2, CryptoHash::Sha256);
     QCOMPARE(result2, QByteArray::fromHex("0b56e5f65263e747af4a833bd7dd7ad26a64d7a4de7c68e52364893dca0766b4"));
 

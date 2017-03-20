@@ -405,7 +405,7 @@ bool DatabaseTabWidget::saveDatabaseAs(Database* db)
             // due to lack of permissions
             if (lockFile->error() != QLockFile::PermissionError) {
                 QMessageBox::StandardButton result = MessageBox::question(this, tr("Save database as"),
-                    tr("The database you are trying to save as is locked by another instance of KeePassX.\n"
+                    tr("The database you are trying to save as is locked by another instance of PasswordVault.\n"
                        "Do you want to save it anyway?"),
                     QMessageBox::Yes | QMessageBox::No);
 

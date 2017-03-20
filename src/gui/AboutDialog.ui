@@ -38,7 +38,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string notr="true">  KeePassX</string>
+        <string notr="true">PasswordVault</string>
        </property>
       </widget>
      </item>
@@ -53,7 +53,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string notr="true">&lt;a href=&quot;http://www.keepassx.org/&quot;&gt;http://www.keepassx.org/&lt;/a&gt;</string>
+      <string notr="true">&lt;a href=&quot;http://www.blustor.co/&quot;&gt;http://www.blustor.co/&lt;/a&gt;</string>
      </property>
      <property name="openExternalLinks">
       <bool>true</bool>

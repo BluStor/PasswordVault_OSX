@@ -53,12 +53,12 @@ int main(int argc, char** argv)
                                                     "Fatal error while testing the cryptographic functions.");
         error.append("\n");
         error.append(Crypto::errorString());
-        MessageBox::critical(nullptr, QCoreApplication::translate("Main", "KeePassX - Error"), error);
+        MessageBox::critical(nullptr, QCoreApplication::translate("Main", "PasswordVault - Error"), error);
         return 1;
     }
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QCoreApplication::translate("main", "KeePassX - cross-platform password manager"));
+    parser.setApplicationDescription(QCoreApplication::translate("main", "PasswordVault - cross-platform password manager"));
     parser.addPositionalArgument("filename", QCoreApplication::translate("main", "filename of the password database to open (*.kdbx)"));
 
     QCommandLineOption configOption("config",
