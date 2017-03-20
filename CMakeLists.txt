@@ -19,7 +19,7 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-project(KeePassX)
+project(PasswordVault)
 
 cmake_minimum_required(VERSION 2.8.12)
 
@@ -119,7 +119,7 @@ if(MINGW)
 endif()
 
 if(APPLE OR MINGW)
-  set(PROGNAME KeePassX)
+  set(PROGNAME PasswordVault)
 else()
   set(PROGNAME keepassx)
 endif()
@@ -140,8 +140,8 @@ else()
   include(GNUInstallDirs)
 
   set(BIN_INSTALL_DIR    "${CMAKE_INSTALL_BINDIR}")
-  set(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/keepassx")
-  set(DATA_INSTALL_DIR   "${CMAKE_INSTALL_DATADIR}/keepassx")
+  set(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/passwordvault")
+  set(DATA_INSTALL_DIR   "${CMAKE_INSTALL_DATADIR}/passwordvault")
 endif()
 
 if(WITH_TESTS)
