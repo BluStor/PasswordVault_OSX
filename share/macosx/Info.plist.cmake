@@ -13,7 +13,7 @@
   <key>CFBundleIconFile</key>
   <string>keepassx.icns</string>
   <key>CFBundleIdentifier</key>
-  <string>org.keepassx.keepassx</string>
+  <string>co.blustor.passwordvault</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -27,7 +27,7 @@
   <key>CFBundleVersion</key>
   <string>${KEEPASSX_VERSION_NUM}</string>
   <key>NSHumanReadableCopyright</key>
-    <string>Copyright 2010-2012 KeePassX Development Team</string>
+    <string>Copyright 2017 BluStor PMC, Inc.</string>
     <key>CFBundleDocumentTypes</key>
     <array>
       <dict>
@@ -38,7 +38,7 @@
         <key>CFBundleTypeIconFile</key>
         <string>keepassx.icns</string>
         <key>CFBundleTypeName</key>
-        <string>KeePassX Password Database</string>
+        <string>PasswordVault</string>
         <key>CFBundleTypeOSTypes</key>
         <array>
           <string>kdbx</string>
