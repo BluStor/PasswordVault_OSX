@@ -36,7 +36,7 @@
 #include "bluetooth/BluetoothDevice.h"
 
 
-const QString MainWindow::BaseWindowTitle = "KeePassX";
+const QString MainWindow::BaseWindowTitle = "PasswordVault";
 MainWindow* MainWindow::m_instance(nullptr);
 
 MainWindow* MainWindow::instance()
@@ -185,7 +185,9 @@ MainWindow::MainWindow()
             SLOT(exportToCsv()));
     connect(m_ui->actionLockDatabases, SIGNAL(triggered()), m_ui->tabWidget,
             SLOT(lockDatabases()));
-    connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
+    //connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
+    connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(quitApplication()));
+
 
     m_actionMultiplexer.connect(m_ui->actionEntryNew, SIGNAL(triggered()),
                                 SLOT(createEntry()));
@@ -482,8 +484,26 @@ void MainWindow::databaseTabChanged(int tabIndex)
     m_actionMultiplexer.setCurrentObject(m_ui->tabWidget->currentDatabaseWidget());
 }
 
+// MB : Respond to Quit menu option separately from window close event
+void MainWindow::quitApplication() {
+
+    bool accept = saveLastDatabases();
+
+    if (accept) {
+        saveWindowInformation();
+        QApplication::quit();
+    }
+
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+
+    // MB: Just hide the app if the user clicks the close button
+    event->ignore();
+    this->hide();
+
+    /*
     bool accept = saveLastDatabases();
 
     if (accept) {
@@ -491,14 +511,18 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
         event->accept();
         QApplication::quit();
+
     }
     else {
         event->ignore();
     }
+    */
+
 }
 
 void MainWindow::changeEvent(QEvent* event)
 {
+
     if ((event->type() == QEvent::WindowStateChange) && isMinimized()
             && isTrayIconEnabled() && m_trayIcon && m_trayIcon->isVisible()
             && config()->get("GUI/MinimizeToTray").toBool())
@@ -509,6 +533,7 @@ void MainWindow::changeEvent(QEvent* event)
     else {
         QMainWindow::changeEvent(event);
     }
+
 }
 
 void MainWindow::saveWindowInformation()

@@ -77,6 +77,9 @@ private Q_SLOTS:
     void lockDatabasesAfterInactivity();
     void repairDatabase();
 
+    //MB: new quit function
+    void quitApplication();
+
 
 
 private:
