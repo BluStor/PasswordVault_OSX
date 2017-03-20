@@ -412,13 +412,13 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
     m_ui->actionImportKeePass1->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
     m_ui->actionRepairDatabase->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
 
-    // ND m_ui->actionLockDatabases->setEnabled(m_ui->tabWidget->hasLockableDatabases());
+    m_ui->actionLockDatabases->setEnabled(m_ui->tabWidget->hasLockableDatabases());
 
-    m_ui->actionLockDatabases->setEnabled(false);
-    m_ui->actionLockDatabases->setVisible(false);
+    //m_ui->actionLockDatabases->setEnabled(false);
+    //m_ui->actionLockDatabases->setVisible(false);
 
-    m_ui->menuTools->setEnabled(false);
-    m_ui->menuTools->setVisible(false);
+    //m_ui->menuTools->setEnabled(false);
+    //m_ui->menuTools->setVisible(false);
     m_ui->actionRepairDatabase->setEnabled(false);
     m_ui->actionRepairDatabase->setVisible(false);
     m_ui->actionImportKeePass1->setEnabled(false);
