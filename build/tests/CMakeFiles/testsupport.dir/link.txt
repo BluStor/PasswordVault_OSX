@@ -1,2 +1,0 @@
-/usr/bin/ar qc libtestsupport.a  CMakeFiles/testsupport.dir/modeltest.cpp.o CMakeFiles/testsupport.dir/FailDevice.cpp.o CMakeFiles/testsupport.dir/testsupport_automoc.cpp.o
-/usr/bin/ranlib libtestsupport.a
