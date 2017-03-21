@@ -7,10 +7,14 @@
 
 #include <qbluetoothlocaldevice.h>
 
+//MB: RFCOMM
+#include <QBluetoothSocket>
+
 #define DEVICE_PORT_NAME_MACRO "cu.CYBERGATE-SerialPortSer"
 #define CURRENT_DATA_DIRECTORY "/passwordvault/"
 #define DB_FILE_NAME "db.kdbx"
-#define DB_FILE_DIR       "/passwordvault/"
+#define DB_FILE_DIR  "/passwordvault/"
+#define SPP_UUID "00001101-0000-1000-8000-00805F9B34FB"
 
 #define  PACKET_SIZE        512
 #define  HEADER_SIZE        3
@@ -18,6 +22,8 @@
 #define  COMMAND_CHANNEL    1
 #define  DATA_CHANNEL       2
 
+// Maximum number of seconds to wait for a connection
+#define  MAX_CONNECTION_WAIT 10
 
 
 #define  MOST_SIGNIFICANT_BIT  0x00
@@ -46,6 +52,7 @@ public:
     ~BluetoothDevice();
     static BluetoothDevice* instance();
     bool connectDevice();
+    bool connectDeviceLegacy();
     void disconnectDevice();
     QByteArray sendCommand(QString cmdName , QString cmdParams);
     void readResponse();
@@ -75,6 +82,29 @@ private:
     static BluetoothDevice* m_instance;
     QString m_fileName ;
     QSerialPort* m_serialPort;
+
+
+
+//MB: RFCOMM
+ public:
+    void startClient();
+    void stopClient();
+    bool waitForBytesWritten(int waitTime);
+    bool waitForReadReady(int waitTime);
+
+ private:
+     QBluetoothSocket *socket = 0;
+     bool sppConnected = false;
+     bool timeout = false;
+     bool dataTimeout = false;
+     bool readReady = false;
+
+ private Q_SLOTS:
+     void connected();
+     void readSocket();
+     void disconnected();
+     void cardTimeout();
+     void cardDataTimeout();
 
 };
 

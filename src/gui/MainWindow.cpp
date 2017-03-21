@@ -408,7 +408,7 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
     bool inDatabaseTabWidgetOrWelcomeWidget = inWelcomeWidget;
     m_ui->actionDatabaseNew->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
     m_ui->actionDatabaseOpen->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
-    //    m_ui->menuRecentDatabases->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
+    //m_ui->menuRecentDatabases->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
     m_ui->actionImportKeePass1->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
     m_ui->actionRepairDatabase->setEnabled(inDatabaseTabWidgetOrWelcomeWidget);
 
@@ -421,8 +421,8 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
     //m_ui->menuTools->setVisible(false);
     m_ui->actionRepairDatabase->setEnabled(false);
     m_ui->actionRepairDatabase->setVisible(false);
-    m_ui->actionImportKeePass1->setEnabled(false);
-    m_ui->actionImportKeePass1->setVisible(false);
+    //m_ui->actionImportKeePass1->setEnabled(false);
+    //m_ui->actionImportKeePass1->setVisible(false);
 
 }
 
