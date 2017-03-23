@@ -188,6 +188,7 @@ MainWindow::MainWindow()
     //connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
     connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(quitApplication()));
 
+    connect(m_ui->tabWidget, SIGNAL(setDatabaseSaveButton(bool)), SLOT(setDatabaseSaveButton(bool)));
 
     m_actionMultiplexer.connect(m_ui->actionEntryNew, SIGNAL(triggered()),
                                 SLOT(createEntry()));
@@ -304,6 +305,7 @@ void MainWindow::newDatabase()
 
 void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
 {
+
     bool inDatabaseTabWidget = (m_ui->stackedWidget->currentIndex() == 0);
     bool inWelcomeWidget = (m_ui->stackedWidget->currentIndex() == 2);
 
@@ -716,6 +718,10 @@ bool MainWindow::isTrayIconEnabled() const
     return config()->get("GUI/ShowTrayIcon").toBool()
             && QSystemTrayIcon::isSystemTrayAvailable();
 #endif
+}
+
+void MainWindow::setDatabaseSaveButton(bool flag) {
+    m_ui->actionDatabaseSave->setEnabled(flag);
 }
 
 

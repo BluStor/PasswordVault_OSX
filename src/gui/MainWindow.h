@@ -76,6 +76,7 @@ private Q_SLOTS:
     void toggleWindow();
     void lockDatabasesAfterInactivity();
     void repairDatabase();
+    void setDatabaseSaveButton(bool);
 
     //MB: new quit function
     void quitApplication();

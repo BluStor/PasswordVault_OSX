@@ -326,6 +326,9 @@ bool DatabaseTabWidget::closeAllDatabases()
 
 bool DatabaseTabWidget::saveDatabase(Database* db)
 {
+
+    Q_EMIT setDatabaseSaveButton(false);
+
     DatabaseManagerStruct& dbStruct = m_dbList[db];
 
     if (dbStruct.saveToFilename) {
@@ -350,6 +353,7 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
                 {
                     MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
                                          + saveFile.errorString());
+                    Q_EMIT setDatabaseSaveButton(true);
                     return false;
                 }
 
@@ -359,6 +363,7 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
             else {
                 MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
                                      + saveFile.errorString());
+                Q_EMIT setDatabaseSaveButton(true);
                 return false;
             }
 
@@ -871,3 +876,4 @@ void DatabaseTabWidget::performGlobalAutoType()
 
     autoType()->performGlobalAutoType(unlockedDatabases);
 }
+
