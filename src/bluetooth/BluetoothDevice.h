@@ -23,7 +23,7 @@
 #define  DATA_CHANNEL       2
 
 // Maximum number of seconds to wait for a connection
-#define  MAX_CONNECTION_WAIT 10
+#define  MAX_CONNECTION_WAIT 15
 
 
 #define  MOST_SIGNIFICANT_BIT  0x00

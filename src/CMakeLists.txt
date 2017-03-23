@@ -246,6 +246,6 @@ if(MINGW )
   set(CPACK_PACKAGE_FILE_NAME "${PROGNAME}-${KEEPASSX_VERSION_NUM}")
   include(CPack)
 
-  include(DeployQt4)
-  install_qt4_executable(${PROGNAME}.exe "qjpeg;qgif;qico;qtaccessiblewidgets")
+  include(DeployQt5)
+  install_qt5_executable(${PROGNAME}.exe "qjpeg;qgif;qico;qtaccessiblewidgets")
 endif()

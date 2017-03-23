@@ -25,9 +25,9 @@ BluetoothDevice::BluetoothDevice(QObject* parent)
 BluetoothDevice::~BluetoothDevice()
 {
     // Close port if its still open
-    if(socket && socket->isOpen())
+    if(socket || socket->isOpen())
     {
-        stopClient();
+        disconnectDevice();
     }
 }
 
@@ -253,9 +253,12 @@ void BluetoothDevice::parseResponse(QByteArray response, QList<int> * statusCode
 
     do
     {
-        int msgType = *(char*)(response.data() + oldIndex);
-        int size_msb = *(char*)(response.data() + oldIndex + 1);
-        int size_lsb = *(char*)(response.data() + oldIndex + 2);
+        //int msgType = *(char*)(response.data() + oldIndex);
+        int msgType = *static_cast<char*>(response.data() + oldIndex);
+        //int size_msb = *(char*)(response.data() + oldIndex + 1);
+        int size_msb = *static_cast<char*>(response.data() + oldIndex + 1);
+        //int size_lsb = *(char*)(response.data() + oldIndex + 2);
+        int size_lsb = *static_cast<char*>(response.data() + oldIndex + 2);
         int size =(size_msb << 8 | size_lsb)-5;
 
         QByteArray listItem = QByteArray(response.data() + oldIndex + 3, size);
@@ -311,9 +314,9 @@ QByteArray BluetoothDevice::createDataPacket(QByteArray data , int dataChannel)
     QByteArray dataPacket(dataPacketSize,0);
 
     // Header
-    dataPacket[0] = (char)(dataChannel & 0xff);
-    dataPacket[1] = (char) (dataPacketSize >> 8);
-    dataPacket[2] = (char) (dataPacketSize & 0xff);
+    dataPacket[0] = static_cast<char>(dataChannel & 0xff);
+    dataPacket[1] = static_cast<char>(dataPacketSize >> 8);
+    dataPacket[2] = static_cast<char>(dataPacketSize & 0xff);
 
     // Add data
     int dataPayloadSize = dataPacketSize - HEADER_SIZE - CHECKSUM_SIZE ;
@@ -355,8 +358,8 @@ QByteArray BluetoothDevice::dePacketizeStream(QByteArray inputStream,int* pFinal
         {
             int packetSizeMSB =  inputStream[oldIndex+1];
             int packetSizeLSB = inputStream[oldIndex+2];
-            int packetSize = (int) packetSizeMSB << 8;
-            packetSize += (int) packetSizeLSB & 0xFF;
+            int packetSize = static_cast<int> (packetSizeMSB << 8);
+            packetSize += static_cast<int> (packetSizeLSB & 0xFF);
 
             outputStream += QByteArray( inputStream.data() + oldIndex + 3, packetSize-5) ;
             oldIndex = oldIndex + packetSize ;
@@ -365,8 +368,8 @@ QByteArray BluetoothDevice::dePacketizeStream(QByteArray inputStream,int* pFinal
         {
             int packetSizeMSB =  inputStream[oldIndex+1];
             int packetSizeLSB = inputStream[oldIndex+2];
-            int packetSize = (int) packetSizeMSB << 8;
-            packetSize += (int) packetSizeLSB & 0xFF;
+            int packetSize = static_cast<int> (packetSizeMSB << 8);
+            packetSize += static_cast<int> (packetSizeLSB & 0xFF);
 
             QByteArray resultStream = QByteArray( inputStream.data() + oldIndex + 3, packetSize-5) ;
 
@@ -445,11 +448,11 @@ bool BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByt
 
         QByteArray cmdBytes = cmd.toUtf8() ;
         QByteArray dataPacket = QByteArray(cmdBytes.size()+ 5, 0);
-        short packetSize = (short)cmdBytes.size() +5;
+        short packetSize = static_cast<short>(cmdBytes.size() +5);
         // Add header
-        dataPacket[0] = (char)(COMMAND_CHANNEL & 0xff);
-        dataPacket[1] = (char) (packetSize >> 8);
-        dataPacket[2] = (char) (packetSize & 0xff);
+        dataPacket[0] = static_cast<char>(COMMAND_CHANNEL & 0xff);
+        dataPacket[1] = static_cast<char> (packetSize >> 8);
+        dataPacket[2] = static_cast<char> (packetSize & 0xff);
         // Add data
         for (int i = 0; i < cmdBytes.size(); i++) {
             dataPacket[i + 3] = cmdBytes[i];
@@ -596,9 +599,9 @@ bool BluetoothDevice::writeToDevice(QByteArray data)
             short packetSize = PACKET_SIZE + 5;
             QByteArray dataPacket = QByteArray(packetSize , 0);
             // Create Data Packet
-            dataPacket[0] = (char)(DATA_CHANNEL & 0xff);
-            dataPacket[1] = (char) (packetSize >> 8);
-            dataPacket[2] = (char) (packetSize & 0xff);
+            dataPacket[0] = static_cast<char>(DATA_CHANNEL & 0xff);
+            dataPacket[1] = static_cast<char> (packetSize >> 8);
+            dataPacket[2] = static_cast<char> (packetSize & 0xff);
             // Add data
             for (int i = 0; i < (PACKET_SIZE ); i++) {
                 dataPacket[i+3] = data[i+startIndex];
@@ -630,9 +633,9 @@ bool BluetoothDevice::writeToDevice(QByteArray data)
             QByteArray dataPacket = QByteArray(packetSize, 0);
 
 
-            dataPacket[0] = (char)(DATA_CHANNEL & 0xff);
-            dataPacket[1] = (char) (packetSize >> 8);
-            dataPacket[2] = (char) (packetSize & 0xff);
+            dataPacket[0] = static_cast<char>(DATA_CHANNEL & 0xff);
+            dataPacket[1] = static_cast<char> (packetSize >> 8);
+            dataPacket[2] = static_cast<char> (packetSize & 0xff);
             // Add data
             for (int i = 0; i <  size ; i++) {
                 dataPacket[i + 3] = data[i+startIndex];
@@ -688,11 +691,11 @@ QByteArray BluetoothDevice::readFileFromCard( QString fileFullPathOnCard)
     QByteArray cmdBytes = cmd.toUtf8() ;
     QByteArray dataPacket = QByteArray(cmdBytes.size()+ HEADER_SIZE + CHECKSUM_SIZE, 0);
 
-    short packetSize = (short)cmdBytes.size() +HEADER_SIZE + CHECKSUM_SIZE;
+    short packetSize = static_cast<short>(cmdBytes.size() +HEADER_SIZE + CHECKSUM_SIZE);
 
-    dataPacket[0] = (char)(COMMAND_CHANNEL & 0xff);
-    dataPacket[1] = (char) (packetSize >> 8);
-    dataPacket[2] = (char) (packetSize & 0xff);
+    dataPacket[0] = static_cast<char>(COMMAND_CHANNEL & 0xff);
+    dataPacket[1] = static_cast<char>(packetSize >> 8);
+    dataPacket[2] = static_cast<char>(packetSize & 0xff);
     // Add data
     for (int i = 0; i < cmdBytes.size(); i++) {
         dataPacket[i + 3] = cmdBytes[i];
@@ -867,9 +870,11 @@ void BluetoothDevice::startClient()
 {
     BluetoothDeviceMac btDeviceMac ;
 
-    // Kill the connection if we're already connected for some reason
-    // This shouldn't happen under normal operations.
-    if (socket) stopClient();
+    // Kill the connection if we're already connected for some reason (shouldn't happen)
+    if (socket) {
+        qDebug() << "startClient: killing unexpected stale socket!";
+        disconnectDevice();
+    }
 
     // Connect to service
     sppConnected = false;
@@ -910,7 +915,7 @@ void BluetoothDevice::disconnected()
     qDebug() << "Disconnected!";
 
     if (socket) {
-        //delete socket;
+        delete socket;
         socket = 0;
     }
 

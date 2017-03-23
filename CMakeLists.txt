@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
       "Choose the type of build, options are: None Debug Release RelWithDebInfo Debug Debugfull Profile MinSizeRel."
       FORCE)
 endif()
@@ -33,8 +33,8 @@ option(WITH_TESTS "Enable building of unit tests" ON)
 option(WITH_GUI_TESTS "Enable building of GUI tests" OFF)
 option(WITH_DEV_BUILD "Use only for development. Disables/warns about deprecated methods." OFF)
 
-set(KEEPASSX_VERSION "2.0.3 Build 1002")
-set(KEEPASSX_VERSION_NUM "2.0.3 Build 1002")
+set(KEEPASSX_VERSION "2.0.3 Build 1003")
+set(KEEPASSX_VERSION_NUM "2.0.3 Build 1003")
 
 if("${CMAKE_C_COMPILER}" MATCHES "clang$" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_COMPILER_IS_CLANG 1)
@@ -121,7 +121,7 @@ endif()
 if(APPLE OR MINGW)
   set(PROGNAME PasswordVault)
 else()
-  set(PROGNAME keepassx)
+  set(PROGNAME PasswordVault)
 endif()
 
 if(APPLE AND "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
