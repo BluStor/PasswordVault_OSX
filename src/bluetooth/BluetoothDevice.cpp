@@ -494,8 +494,6 @@ bool BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByt
         {
             finalStatusCode = 0 ;
 
-            data.append("\r\n");
-
             // 2. Write file
 
             qDebug() << "\n\n SIZE :" << data.size() << "\n\n" ;
@@ -591,6 +589,15 @@ bool BluetoothDevice::writeToDevice(QByteArray data)
     int size = data.size() ;
     int startIndex = 0;
     int errC = 0 ;
+
+    /*
+    QFile file("/Users/markbennett/Downloads/test.kdbx");
+    file.open(QIODevice::WriteOnly);
+    file.write(data);
+    file.close();
+    return true;
+    */
+
 
     while(size>0)
     {
