@@ -102,7 +102,7 @@ void ChangeMasterKeyWidget::generateKey()
         if (m_ui->enterPasswordEdit->text() == m_ui->repeatPasswordEdit->text()) {
             if (m_ui->enterPasswordEdit->text().isEmpty()) {
                 if (MessageBox::question(this, tr("Question"),
-                                         tr("Do you really want to use an empty string as password?"),
+                                         tr("Do you really want to use an empty passphrase?"),
                                          QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
                     return;
                 }
@@ -110,7 +110,7 @@ void ChangeMasterKeyWidget::generateKey()
             m_key.addKey(PasswordKey(m_ui->enterPasswordEdit->text()));
         }
         else {
-            MessageBox::warning(this, tr("Error"), tr("Different passwords supplied."));
+            MessageBox::warning(this, tr("Error"), tr("Different passphrases supplied."));
             m_ui->enterPasswordEdit->setText("");
             m_ui->repeatPasswordEdit->setText("");
             return;

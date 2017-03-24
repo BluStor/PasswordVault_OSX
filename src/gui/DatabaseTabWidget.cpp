@@ -160,7 +160,7 @@ void DatabaseTabWidget::openDatabase(const QString& fileName, const QString& pw,
 
     MainWindow* mainWindow = mainWindowInstance();
     mainWindow->show();
-    mainWindow->updateWelcomeWidget(PROGRESS_INIT , "Opening database ... Please wait...");
+    mainWindow->updateWelcomeWidget(PROGRESS_INIT , "Opening Password Vault ... Please wait...");
 
 
     if ( btDeviceInstance->connectDevice() == true )
@@ -327,8 +327,6 @@ bool DatabaseTabWidget::closeAllDatabases()
 bool DatabaseTabWidget::saveDatabase(Database* db)
 {
 
-    Q_EMIT setDatabaseSaveButton(false);
-
     DatabaseManagerStruct& dbStruct = m_dbList[db];
 
     if (dbStruct.saveToFilename) {
@@ -346,7 +344,7 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
                     return false;
                 }
 
-
+                Q_EMIT setDatabaseSaveButton(false);
                 BluetoothDevice *instance = btDevice();
 
                 if(instance->storeFileOnCard(DB_FILE_DIR,DB_FILE_NAME , saveFile.data()) == false)
@@ -356,14 +354,13 @@ bool DatabaseTabWidget::saveDatabase(Database* db)
                     Q_EMIT setDatabaseSaveButton(true);
                     return false;
                 }
-
-
+                MessageBox::information(this,tr("Information"), tr("\nChanges successfully saved to\nPassword Vault."));
+                Q_EMIT setDatabaseSaveButton(true);
 
             }
             else {
                 MessageBox::critical(this, tr("Error"), tr("Writing the database failed.") + "\n\n"
                                      + saveFile.errorString());
-                Q_EMIT setDatabaseSaveButton(true);
                 return false;
             }
 

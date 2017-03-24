@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
     MainWindow* mainWindow = mainWindowInstance();
     mainWindow->show();
-    mainWindow->updateWelcomeWidget(PROGRESS_INIT , "Opening database ... Please wait...");
+    mainWindow->updateWelcomeWidget(PROGRESS_INIT , "Opening Password Vault ... Please wait...");
 
     app.setMainWindow(mainWindow);
 

@@ -64,7 +64,7 @@ void DatabaseOpenWidget::load(const QString& filename)
 {
     m_filename = filename;
 
-    m_ui->labelFilename->setText(filename);
+    //m_ui->labelFilename->setText(filename);
 
     if (config()->get("RememberLastKeyFiles").toBool()) {
         QHash<QString, QVariant> lastKeyFiles = config()->get("LastKeyFiles").toHash();

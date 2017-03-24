@@ -306,7 +306,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Change master key</string>
+    <string>Change passphrase</string>
    </property>
   </action>
   <action name="actionChangeDatabaseSettings">

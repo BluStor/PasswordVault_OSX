@@ -666,7 +666,7 @@ bool BluetoothDevice::writeToDevice(QByteArray data)
             return writeOperationSuccessful ;
         }
         qDebug() << QTime::currentTime() << " : " << errC << " bytes of data written to card" ;
-        QThread::msleep(120); // -- Sleep Copied from the Java Uitlity
+        QThread::msleep(100); // -- Sleep Copied from the Java Uitlity so we don't overrun the card's buffer
     }
     return writeOperationSuccessful ;
 }

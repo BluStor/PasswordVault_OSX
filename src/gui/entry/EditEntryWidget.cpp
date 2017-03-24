@@ -105,7 +105,7 @@ void EditEntryWidget::setupMain()
 void EditEntryWidget::setupAdvanced()
 {
     m_advancedUi->setupUi(m_advancedWidget);
-    add(tr("Advanced"), m_advancedWidget);
+    //add(tr("Advanced"), m_advancedWidget);
 
     m_attachmentsModel->setEntryAttachments(m_entryAttachments);
     m_advancedUi->attachmentsView->setModel(m_attachmentsModel);

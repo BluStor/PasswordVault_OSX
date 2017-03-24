@@ -10,7 +10,7 @@
     <height>250</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,1,0,0,3">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0,0,3">
    <property name="spacing">
     <number>8</number>
    </property>
@@ -28,14 +28,21 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="labelHeadline">
-     <property name="text">
-      <string>Enter master key</string>
+    <widget class="QLabel" name="labelFilename">
+     <property name="enabled">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="labelFilename"/>
+    <widget class="QLabel" name="labelHeadline">
+     <property name="text">
+      <string>Enter your passphrase or key file</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer_3">
@@ -45,13 +52,16 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>5</height>
       </size>
      </property>
     </spacer>
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="horizontalSpacing">
+      <number>10</number>
+     </property>
      <property name="verticalSpacing">
       <number>8</number>
      </property>
@@ -64,8 +74,17 @@
      </item>
      <item row="0" column="0">
       <widget class="QCheckBox" name="checkPassword">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>Password:</string>
+        <string>Passphrase:</string>
        </property>
       </widget>
      </item>
@@ -97,8 +116,14 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
          <property name="editable">
           <bool>true</bool>
+         </property>
+         <property name="currentIndex">
+          <number>-1</number>
          </property>
         </widget>
        </item>
@@ -147,10 +172,8 @@
  </customwidgets>
  <tabstops>
   <tabstop>checkPassword</tabstop>
-  <tabstop>editPassword</tabstop>
   <tabstop>buttonTogglePassword</tabstop>
   <tabstop>checkKeyFile</tabstop>
-  <tabstop>comboKeyFile</tabstop>
   <tabstop>buttonBrowseFile</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
