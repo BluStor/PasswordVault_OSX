@@ -135,7 +135,7 @@ void EditEntryWidget::setupIcon()
 void EditEntryWidget::setupAutoType()
 {
     m_autoTypeUi->setupUi(m_autoTypeWidget);
-    add(tr("Auto-Type"), m_autoTypeWidget);
+    //add(tr("Auto-Type"), m_autoTypeWidget);
 
     m_autoTypeDefaultSequenceGroup->addButton(m_autoTypeUi->inheritSequenceButton);
     m_autoTypeDefaultSequenceGroup->addButton(m_autoTypeUi->customSequenceButton);
