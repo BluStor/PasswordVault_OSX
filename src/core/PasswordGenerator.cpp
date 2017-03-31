@@ -88,6 +88,17 @@ QString PasswordGenerator::generatePassword() const
 
     return password;
 }
+int PasswordGenerator::getbits() const
+{
+    QVector<PasswordGroup> groups = passwordGroups();
+    int bits = 0;
+    QVector<QChar> passwordChars;
+    Q_FOREACH (const PasswordGroup& group, groups) {
+        bits += group.size();
+    }
+    bits *= m_length;
+    return bits;
+}
 
 bool PasswordGenerator::isValid() const
 {

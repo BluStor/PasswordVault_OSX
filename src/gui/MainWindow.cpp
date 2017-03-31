@@ -36,6 +36,39 @@
 #include "bluetooth/BluetoothDevice.h"
 
 
+#include "http/Service.h"
+#include "http/HttpSettings.h"
+#include "http/OptionDialog.h"
+#include "gui/SettingsWidget.h"
+class HttpPlugin: public ISettingsPage {
+    public:
+        HttpPlugin(DatabaseTabWidget * tabWidget) {
+            m_service = new Service(tabWidget);
+        }
+        virtual ~HttpPlugin() {
+        }
+        virtual QString name() {
+            return QObject::tr("Http");
+        }
+        virtual QWidget * createWidget() {
+            OptionDialog * dlg = new OptionDialog();
+            QObject::connect(dlg, SIGNAL(removeSharedEncryptionKeys()), m_service, SLOT(removeSharedEncryptionKeys()));
+            QObject::connect(dlg, SIGNAL(removeStoredPermissions()), m_service, SLOT(removeStoredPermissions()));
+            return dlg;
+        }
+        virtual void loadSettings(QWidget * widget) {
+            qobject_cast<OptionDialog*>(widget)->loadSettings();
+        }
+        virtual void saveSettings(QWidget * widget) {
+            qobject_cast<OptionDialog*>(widget)->saveSettings();
+            if (HttpSettings::isEnabled())
+                m_service->start();
+            else
+                m_service->stop();
+        }
+    private:
+        Service *m_service;
+    };
 const QString MainWindow::BaseWindowTitle = "PasswordVault";
 MainWindow* MainWindow::m_instance(nullptr);
 
@@ -57,6 +90,7 @@ MainWindow::MainWindow()
     m_countDefaultAttributes = m_ui->menuEntryCopyAttribute->actions().size();
 
     restoreGeometry(config()->get("GUI/MainWindowGeometry").toByteArray());
+    m_ui->settingsWidget->addSettingsPage(new HttpPlugin(m_ui->tabWidget));
 
     setWindowIcon(filePath()->applicationIcon());
     QAction* toggleViewAction = m_ui->toolBar->toggleViewAction();
@@ -105,6 +139,7 @@ MainWindow::MainWindow()
     m_ui->actionEntryClone->setShortcut(Qt::CTRL + Qt::Key_K);
     m_ui->actionEntryCopyUsername->setShortcut(Qt::CTRL + Qt::Key_B);
     m_ui->actionEntryCopyPassword->setShortcut(Qt::CTRL + Qt::Key_C);
+    m_ui->actionEntryCopyTOTP->setShortcut(Qt::CTRL + Qt::Key_T);
     setShortcut(m_ui->actionEntryAutoType, QKeySequence::Paste, Qt::CTRL + Qt::Key_V);
     m_ui->actionEntryOpenUrl->setShortcut(Qt::CTRL + Qt::Key_U);
     m_ui->actionEntryCopyURL->setShortcut(Qt::CTRL + Qt::ALT + Qt::Key_U);
@@ -128,6 +163,7 @@ MainWindow::MainWindow()
     m_ui->actionEntryAutoType->setIcon(filePath()->icon("actions", "auto-type", false));
     m_ui->actionEntryCopyUsername->setIcon(filePath()->icon("actions", "username-copy", false));
     m_ui->actionEntryCopyPassword->setIcon(filePath()->icon("actions", "password-copy", false));
+    m_ui->actionEntryCopyTOTP->setIcon(filePath()->icon("actions", "totp-copy", false));
 
     m_ui->actionGroupNew->setIcon(filePath()->icon("actions", "group-new", false));
     m_ui->actionGroupEdit->setIcon(filePath()->icon("actions", "group-edit", false));
@@ -205,6 +241,8 @@ MainWindow::MainWindow()
                                 SLOT(copyUsername()));
     m_actionMultiplexer.connect(m_ui->actionEntryCopyPassword, SIGNAL(triggered()),
                                 SLOT(copyPassword()));
+    m_actionMultiplexer.connect(m_ui->actionEntryCopyTOTP, SIGNAL(triggered()),
+            SLOT(copyTOTP()));
     m_actionMultiplexer.connect(m_ui->actionEntryCopyURL, SIGNAL(triggered()),
                                 SLOT(copyURL()));
     m_actionMultiplexer.connect(m_ui->actionEntryCopyNotes, SIGNAL(triggered()),
@@ -331,6 +369,7 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
             m_ui->actionEntryCopyTitle->setEnabled(singleEntrySelected && dbWidget->currentEntryHasTitle());
             m_ui->actionEntryCopyUsername->setEnabled(singleEntrySelected && dbWidget->currentEntryHasUsername());
             m_ui->actionEntryCopyPassword->setEnabled(singleEntrySelected && dbWidget->currentEntryHasPassword());
+            m_ui->actionEntryCopyTOTP->setEnabled(singleEntrySelected && dbWidget->currentEntryHasTOTP());
             m_ui->actionEntryCopyURL->setEnabled(singleEntrySelected && dbWidget->currentEntryHasUrl());
             m_ui->actionEntryCopyNotes->setEnabled(singleEntrySelected && dbWidget->currentEntryHasNotes());
             m_ui->menuEntryCopyAttribute->setEnabled(singleEntrySelected);
@@ -362,6 +401,7 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
             m_ui->actionEntryCopyTitle->setEnabled(false);
             m_ui->actionEntryCopyUsername->setEnabled(false);
             m_ui->actionEntryCopyPassword->setEnabled(false);
+            m_ui->actionEntryCopyTOTP->setEnabled(false);
             m_ui->actionEntryCopyURL->setEnabled(false);
             m_ui->actionEntryCopyNotes->setEnabled(false);
             m_ui->menuEntryCopyAttribute->setEnabled(false);
@@ -392,6 +432,7 @@ void MainWindow::setMenuActionState(DatabaseWidget::Mode mode)
         m_ui->actionEntryCopyTitle->setEnabled(false);
         m_ui->actionEntryCopyUsername->setEnabled(false);
         m_ui->actionEntryCopyPassword->setEnabled(false);
+        m_ui->actionEntryCopyTOTP->setEnabled(false);
         m_ui->actionEntryCopyURL->setEnabled(false);
         m_ui->actionEntryCopyNotes->setEnabled(false);
         m_ui->menuEntryCopyAttribute->setEnabled(false);

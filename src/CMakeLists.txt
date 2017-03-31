@@ -116,6 +116,14 @@ set(keepassx_SOURCES
     gui/group/EditGroupWidget.cpp
     gui/group/GroupModel.cpp
     gui/group/GroupView.cpp
+    http/AccessControlDialog.cpp
+    http/EntryConfig.cpp
+    http/HttpPasswordGeneratorWidget.cpp
+    http/HttpSettings.cpp
+    http/OptionDialog.cpp
+    http/Protocol.cpp
+    http/Server.cpp
+    http/Service.cpp
     keys/CompositeKey.cpp
     keys/CompositeKey_p.h
     keys/FileKey.cpp
@@ -153,6 +161,9 @@ set(keepassx_FORMS
     gui/entry/EditEntryWidgetHistory.ui
     gui/entry/EditEntryWidgetMain.ui
     gui/group/EditGroupWidgetMain.ui
+    http/AccessControlDialog.ui
+    http/HttpPasswordGeneratorWidget.ui
+    http/OptionDialog.ui
 )
 
 if(MINGW)
@@ -183,7 +194,8 @@ ADD_OSX_FRAMEWORK(Foundation ${PROGNAME})
 ADD_OSX_FRAMEWORK(IOBluetooth ${PROGNAME})
 
 set_target_properties(keepassx_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
-target_link_libraries(keepassx_core Qt5::Core Qt5::Concurrent Qt5::Widgets  Qt5::SerialPort Qt5::Bluetooth  "-framework Foundation" "-framework IOBluetooth" )
+target_link_libraries(keepassx_core Qt5::Core Qt5::Concurrent Qt5::Widgets  Qt5::SerialPort Qt5::Bluetooth Qt5::Network qjson-qt5 ${QT_QTNETWORK_LIBRARY} ${QJSON_qt5_LIBRARIES}
+    ${MHD_LIBRARIES} ${OATH_LIBRARIES} "-framework Foundation" "-framework IOBluetooth" )
 
 add_executable(${PROGNAME} WIN32 MACOSX_BUNDLE ${keepassx_SOURCES_MAINEXE})
 
