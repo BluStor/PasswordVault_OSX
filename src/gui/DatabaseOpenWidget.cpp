@@ -101,6 +101,7 @@ void DatabaseOpenWidget::openDatabase()
     CompositeKey masterKey = databaseKey();
 
     // ND QFile file(m_filename);
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     BluetoothDevice *instance = btDevice();
     QByteArray fileData ;
 
@@ -108,11 +109,15 @@ void DatabaseOpenWidget::openDatabase()
     {
 
         fileData = instance->readFileFromCard(QString(DB_FILE_DIR) + QString(DB_FILE_NAME));
+
     }
     else
     {
-         return;
+        m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+        return;
     }
+
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 
     QBuffer file(&fileData);
 
