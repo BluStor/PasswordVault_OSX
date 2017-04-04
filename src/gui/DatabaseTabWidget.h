@@ -69,6 +69,7 @@ public Q_SLOTS:
     void exportToCsv();
     bool closeDatabase(int index = -1);
     void closeDatabaseFromSender();
+    void saveDatabaseFromSender();
     bool closeAllDatabases();
     void changeMasterKey();
     void changeDatabaseSettings();

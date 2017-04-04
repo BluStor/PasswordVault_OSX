@@ -47,6 +47,8 @@
 #include "gui/group/EditGroupWidget.h"
 #include "gui/group/GroupView.h"
 
+#include "gui/DatabaseTabWidget.h"
+
 DatabaseWidget::DatabaseWidget(Database* db, QWidget* parent)
     : QStackedWidget(parent)
     , m_db(db)
@@ -650,7 +652,9 @@ void DatabaseWidget::updateMasterKey(bool accepted)
         return;
     }
 
+    Q_EMIT saveRequest();
     setCurrentWidget(m_mainWidget);
+
 }
 
 void DatabaseWidget::openDatabase(bool accepted)

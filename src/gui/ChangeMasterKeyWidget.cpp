@@ -96,6 +96,8 @@ QLabel* ChangeMasterKeyWidget::headlineLabel()
 
 void ChangeMasterKeyWidget::generateKey()
 {
+    m_ui->buttonBox->setEnabled(false);
+
     m_key.clear();
 
     if (m_ui->passwordGroup->isChecked()) {
@@ -104,6 +106,7 @@ void ChangeMasterKeyWidget::generateKey()
                 if (MessageBox::question(this, tr("Question"),
                                          tr("Do you really want to use an empty passphrase?"),
                                          QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
+                    m_ui->buttonBox->setEnabled(true);
                     return;
                 }
             }
@@ -113,6 +116,7 @@ void ChangeMasterKeyWidget::generateKey()
             MessageBox::warning(this, tr("Error"), tr("Different passphrases supplied."));
             m_ui->enterPasswordEdit->setText("");
             m_ui->repeatPasswordEdit->setText("");
+            m_ui->buttonBox->setEnabled(true);
             return;
         }
     }
@@ -123,12 +127,15 @@ void ChangeMasterKeyWidget::generateKey()
             MessageBox::critical(this, tr("Failed to set key file"),
                                  tr("Failed to set %1 as the Key file:\n%2")
                                  .arg(m_ui->keyFileCombo->currentText(), errorMsg));
+            m_ui->buttonBox->setEnabled(true);
             return;
         }
         m_key.addKey(fileKey);
     }
 
     Q_EMIT editFinished(true);
+
+    m_ui->buttonBox->setEnabled(true);
 }
 
 

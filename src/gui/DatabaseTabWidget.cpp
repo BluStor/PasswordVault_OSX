@@ -118,12 +118,13 @@ void DatabaseTabWidget::newDatabase()
     {
         DatabaseManagerStruct dbStruct;
         Database* db = new Database();
-        db->rootGroup()->setName(tr("Root"));
+        db->rootGroup()->setName(tr("Password Vault"));
         dbStruct.dbWidget = new DatabaseWidget(db, this);
 
         insertDatabase(db, dbStruct);
 
         dbStruct.dbWidget->switchToMasterKeyChange();
+
     }
 }
 
@@ -515,6 +516,16 @@ void DatabaseTabWidget::closeDatabaseFromSender()
     closeDatabase(db);
 }
 
+void DatabaseTabWidget::saveDatabaseFromSender()
+{
+    Q_ASSERT(sender());
+    DatabaseWidget* dbWidget = static_cast<DatabaseWidget*>(sender());
+    Database* db = databaseFromDatabaseWidget(dbWidget);
+    int index = databaseIndex(db);
+    setCurrentIndex(index);
+    saveDatabase(db);
+}
+
 bool DatabaseTabWidget::saveDatabase(int index)
 {
     if (index == -1) {
@@ -689,6 +700,7 @@ void DatabaseTabWidget::insertDatabase(Database* db, const DatabaseManagerStruct
     int index = databaseIndex(db);
     setCurrentIndex(index);
     connectDatabase(db);
+    connect(dbStruct.dbWidget, SIGNAL(saveRequest()), SLOT(saveDatabaseFromSender()));
     connect(dbStruct.dbWidget, SIGNAL(closeRequest()), SLOT(closeDatabaseFromSender()));
     connect(dbStruct.dbWidget, SIGNAL(databaseChanged(Database*)), SLOT(changeDatabase(Database*)));
     connect(dbStruct.dbWidget, SIGNAL(unlockedDatabase()), SLOT(updateTabNameFromDbWidgetSender()));

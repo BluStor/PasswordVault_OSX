@@ -87,6 +87,7 @@ public:
     bool currentEntryHasNotes();
 
 Q_SIGNALS:
+    void saveRequest();
     void closeRequest();
     void currentModeChanged(DatabaseWidget::Mode mode);
     void groupChanged();
