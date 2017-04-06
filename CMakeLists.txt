@@ -155,7 +155,7 @@ find_package(Qt5Test          5.2 REQUIRED)
 find_package(Qt5LinguistTools 5.2 REQUIRED)
 find_package(Qt5SerialPort 5.2 REQUIRED)
 find_package(Qt5Bluetooth 5.2 REQUIRED)
-
+find_package(Qt5Network 5.2 REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 
@@ -164,6 +164,9 @@ set(CMAKE_AUTOMOC ON)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_NONE QT_NO_DEBUG)
 
 find_package(Gcrypt 1.6.0 REQUIRED)
+find_package(Oath REQUIRED)
+find_package(LibMicroHTTPD REQUIRED)
+find_package(QJSON-qt5 REQUIRED)
 
 find_package(ZLIB REQUIRED)
 
@@ -202,7 +205,7 @@ if(UNIX)
   endif()
 endif()
 
-include_directories(SYSTEM ${GCRYPT_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+include_directories(SYSTEM ${GCRYPT_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} ${OATH_INCLUDE_DIR})
 
 include(FeatureSummary)
 

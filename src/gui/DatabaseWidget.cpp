@@ -47,6 +47,11 @@
 #include "gui/group/EditGroupWidget.h"
 #include "gui/group/GroupView.h"
 
+extern "C" {
+#include <liboath/oath.h>
+}
+#define TOTP_ATTR "TOTP Seed"
+
 #include "gui/DatabaseTabWidget.h"
 
 DatabaseWidget::DatabaseWidget(Database* db, QWidget* parent)
@@ -412,6 +417,42 @@ void DatabaseWidget::copyPassword()
     }
 
     setClipboardTextAndMinimize(currentEntry->password());
+}
+void DatabaseWidget::copyTOTP()
+{
+    Entry* currentEntry = m_entryView->currentEntry();
+    if (!currentEntry) {
+        Q_ASSERT(false);
+        return;
+    }
+    if (currentEntry->attributes()->hasKey(TOTP_ATTR)) {
+        char output_otp[20];
+        int ret;
+        const char *secret = qPrintable(currentEntry->attributes()->value(TOTP_ATTR));
+        char *bin_secret = NULL;
+        size_t bin_secret_len;
+        ret = oath_init();
+        if (0 == ret) {
+            ret = oath_base32_decode(secret, strlen(secret),
+                                     &bin_secret, &bin_secret_len);
+        }
+        memset(output_otp, 0, sizeof(output_otp));
+        if (0 == ret) {
+            ret = oath_totp_generate(bin_secret,
+                                     bin_secret_len,
+                                     time(NULL),
+                                     OATH_TOTP_DEFAULT_TIME_STEP_SIZE,
+                                     OATH_TOTP_DEFAULT_START_TIME,
+                                     6, output_otp);
+        }
+        oath_done();
+        free(bin_secret);
+        if (0 == ret) {
+            setClipboardTextAndMinimize(QString(output_otp));
+            return;
+        }
+    }
+    setClipboardTextAndMinimize(QString(""));
 }
 
 void DatabaseWidget::copyURL()
@@ -990,6 +1031,16 @@ bool DatabaseWidget::currentEntryHasPassword()
         return false;
     }
     return !currentEntry->password().isEmpty();
+}
+bool DatabaseWidget::currentEntryHasTOTP()
+{
+    Entry* currentEntry = m_entryView->currentEntry();
+    if (!currentEntry) {
+        Q_ASSERT(false);
+        return false;
+    }
+    return currentEntry->attributes()->hasKey(TOTP_ATTR) &&
+            !currentEntry->attributes()->value(TOTP_ATTR).isEmpty();
 }
 
 bool DatabaseWidget::currentEntryHasUrl()

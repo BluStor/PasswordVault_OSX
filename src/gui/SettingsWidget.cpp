@@ -23,6 +23,25 @@
 #include "core/Config.h"
 #include "core/Translator.h"
 
+#include "http/OptionDialog.h"
+#include "http/HttpSettings.h"
+class SettingsWidget::ExtraPage
+{
+    public:
+        ExtraPage(ISettingsPage* page, QWidget* widget): settingsPage(page), widget(widget)
+        {}
+        void loadSettings() const
+        {
+            settingsPage->loadSettings(widget);
+        }
+        void saveSettings() const
+        {
+            settingsPage->saveSettings(widget);
+        }
+    private:
+        QSharedPointer<ISettingsPage> settingsPage;
+        QWidget* widget;
+};
 SettingsWidget::SettingsWidget(QWidget* parent)
     : EditWidget(parent)
     , m_secWidget(new QWidget())
@@ -63,6 +82,13 @@ SettingsWidget::SettingsWidget(QWidget* parent)
 
 SettingsWidget::~SettingsWidget()
 {
+}
+void SettingsWidget::addSettingsPage(ISettingsPage *page)
+{
+    QWidget * widget = page->createWidget();
+    widget->setParent(this);
+    m_extraPages.append(ExtraPage(page, widget));
+    add(page->name(), widget);
 }
 
 void SettingsWidget::loadSettings()
@@ -108,6 +134,8 @@ void SettingsWidget::loadSettings()
 
     m_secUi->autoTypeAskCheckBox->setChecked(config()->get("security/autotypeask").toBool());
 
+    Q_FOREACH (const ExtraPage& page, m_extraPages)
+        page.loadSettings();
     setCurrentRow(0);
 }
 
@@ -146,6 +174,8 @@ void SettingsWidget::saveSettings()
 
     config()->set("security/autotypeask", m_secUi->autoTypeAskCheckBox->isChecked());
 
+    Q_FOREACH (const ExtraPage& page, m_extraPages)
+        page.saveSettings();
     Q_EMIT editFinished(true);
 }
 

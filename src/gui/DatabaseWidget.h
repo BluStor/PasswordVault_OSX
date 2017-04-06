@@ -83,6 +83,7 @@ public:
     bool currentEntryHasTitle();
     bool currentEntryHasUsername();
     bool currentEntryHasPassword();
+    bool currentEntryHasTOTP();
     bool currentEntryHasUrl();
     bool currentEntryHasNotes();
 
@@ -113,6 +114,7 @@ public Q_SLOTS:
     void copyTitle();
     void copyUsername();
     void copyPassword();
+    void copyTOTP();
     void copyURL();
     void copyNotes();
     void copyAttribute(QAction* action);
