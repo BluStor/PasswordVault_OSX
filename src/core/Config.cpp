@@ -17,6 +17,7 @@
 
 #include "Config.h"
 
+#include <QDebug>
 #include <QCoreApplication>
 #include <QDir>
 #include <QSettings>
@@ -75,7 +76,9 @@ Config::Config(QObject* parent)
     userPath += "/";
 #endif
 
-    userPath += "keepassx2.ini";
+    userPath += "passwordvault.ini";
+
+    qDebug() << "User settings path: " + userPath;
 
     init(userPath);
 }

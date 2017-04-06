@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     Tools::setupSearchPaths();
 
     Application app(argc, argv);
-    Application::setApplicationName("keepassx");
+    Application::setApplicationName("passwordvault");
     Application::setApplicationVersion(KEEPASSX_VERSION);
     // don't set organizationName as that changes the return value of
     // QStandardPaths::writableLocation(QDesktopServices::DataLocation)

@@ -28,7 +28,7 @@ void HttpSettings::setEnabled(bool enabled)
 
 bool HttpSettings::showNotification()
 {
-    return config()->get("Http/ShowNotification", true).toBool();
+    return config()->get("Http/ShowNotification", false).toBool();
 }
 
 void HttpSettings::setShowNotification(bool showNotification)

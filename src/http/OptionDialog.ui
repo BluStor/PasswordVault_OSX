@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>354</height>
+    <width>532</width>
+    <height>357</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,8 +37,14 @@ This is required for accessing keypass database from ChromeIPass or PassIfox</st
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QCheckBox" name="showNotification">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Sh&amp;ow a notification when credentials are requested</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
