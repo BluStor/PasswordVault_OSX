@@ -37,7 +37,8 @@ static const unsigned char KEEPASSHTTP_UUID_DATA[] = {
 static const Uuid KEEPASSHTTP_UUID = Uuid(QByteArray::fromRawData(reinterpret_cast<const char *>(KEEPASSHTTP_UUID_DATA), sizeof(KEEPASSHTTP_UUID_DATA)));
 static const char KEEPASSHTTP_NAME[] = "KeePassHttp Settings";
 static const char ASSOCIATE_KEY_PREFIX[] = "AES Key: ";
-static const char KEEPASSHTTP_GROUP_NAME[] = "KeePassHttp Passwords";   //Group where new KeePassHttp password are stored
+//static const char KEEPASSHTTP_GROUP_NAME[] = "KeePassHttp Passwords";   //Group where new KeePassHttp password are stored
+static const char KEEPASSHTTP_GROUP_NAME[] = "Password Vault";   //Group where new KeePassHttp password are stored
 static int        KEEPASSHTTP_DEFAULT_ICON = 1;
 //private const int DEFAULT_NOTIFICATION_TIME = 5000;
 
