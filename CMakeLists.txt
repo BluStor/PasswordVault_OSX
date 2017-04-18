@@ -112,6 +112,9 @@ if(APPLE)
 endif()
 
 if(APPLE)
+    SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
     set(CMAKE_INSTALL_RPATH "@executable_path;@executable_path/../Frameworks")
 endif()
 
