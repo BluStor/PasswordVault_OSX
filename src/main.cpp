@@ -119,12 +119,15 @@ int main(int argc, char** argv)
     if ( btDeviceInstance->connectDevice() == true )
     {
 
+
         mainWindow->updateWelcomeWidget(PROGRESS_CHECK_DB_FILE , NULL);
 
         if(btDeviceInstance->checkIfFileExists(DB_FILE_DIR, DB_FILE_NAME))
         {
             mainWindow->updateWelcomeWidget(PROGRESS_OPEN_NEW_DB , NULL);
+
             // openDataBase
+            mainWindow->setFirmwareUpdateButton(true);
             mainWindow->openDatabase(QString(DB_FILE_DIR) + DB_FILE_NAME, QString(), QString());
 
         }

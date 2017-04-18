@@ -136,6 +136,7 @@ set(keepassx_SOURCES
     streams/SymmetricCipherStream.cpp
     bluetooth/BluetoothDevice.cpp
     bluetooth/bluetoothdevicemac.mm
+    gui/FirmwareUpdateWidget.cpp
 )
 
 set(keepassx_SOURCES_MAINEXE
@@ -164,6 +165,7 @@ set(keepassx_FORMS
     http/AccessControlDialog.ui
     http/HttpPasswordGeneratorWidget.ui
     http/OptionDialog.ui
+    gui/FirmwareUpdateWidget.ui
 )
 
 if(MINGW)

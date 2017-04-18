@@ -21,6 +21,8 @@
 #include <QCloseEvent>
 #include <QShortcut>
 #include <QTimer>
+#include <QDebug>
+#include <QProgressDialog>
 
 #include "autotype/AutoType.h"
 #include "core/Config.h"
@@ -69,6 +71,7 @@ class HttpPlugin: public ISettingsPage {
     private:
         Service *m_service;
     };
+
 const QString MainWindow::BaseWindowTitle = "PasswordVault";
 MainWindow* MainWindow::m_instance(nullptr);
 
@@ -221,9 +224,14 @@ MainWindow::MainWindow()
             SLOT(exportToCsv()));
     connect(m_ui->actionLockDatabases, SIGNAL(triggered()), m_ui->tabWidget,
             SLOT(lockDatabases()));
+
+    //MB: Firmware update
+    //connect(m_ui->actionFirmware, SIGNAL(triggered()), this, SLOT(updateFirmware()));
+    connect(m_ui->actionFirmware, SIGNAL(triggered()), m_ui->tabWidget, SLOT(updateFirmware()));
+    connect(m_ui->tabWidget, SIGNAL(setFirmwareUpdateButton(bool)), SLOT(setFirmwareUpdateButton(bool)));
+
     //connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(close()));
     connect(m_ui->actionQuit, SIGNAL(triggered()), SLOT(quitApplication()));
-
     connect(m_ui->tabWidget, SIGNAL(setDatabaseSaveButton(bool)), SLOT(setDatabaseSaveButton(bool)));
 
     m_actionMultiplexer.connect(m_ui->actionEntryNew, SIGNAL(triggered()),
@@ -763,6 +771,10 @@ bool MainWindow::isTrayIconEnabled() const
 
 void MainWindow::setDatabaseSaveButton(bool flag) {
     m_ui->actionDatabaseSave->setEnabled(flag);
+}
+
+void MainWindow::setFirmwareUpdateButton(bool flag) {
+    m_ui->actionFirmware->setEnabled(flag);
 }
 
 

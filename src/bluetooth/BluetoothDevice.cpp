@@ -515,7 +515,7 @@ bool BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByt
                     QDateTime time = QDateTime::currentDateTime();
                     QString sTime = time.toString("yyyyMMddhhmmss");
 
-                    QByteArray srftResponseData = sendCommand("SRFT", sTime+ " " + DB_FILE_DIR + fileName);
+                    QByteArray srftResponseData = sendCommand("SRFT", sTime+ " " + onCardPath + fileName);
 
                     if(srftResponseData.isEmpty()==true)
                     {
@@ -526,7 +526,7 @@ bool BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByt
 
                     }
 
-                    if((srftResponseData.isEmpty() == false)&&(srftResponseData.contains(QString(DB_FILE_DIR + QString(DB_FILE_NAME)).toLatin1())))
+                    if((srftResponseData.isEmpty() == false)&&(srftResponseData.contains(QString(onCardPath + QString(fileName)).toLatin1())))
                     {
                         returnValue = true ;
                     }

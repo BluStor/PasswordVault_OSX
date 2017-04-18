@@ -40,6 +40,7 @@
 #include "gui/group/GroupView.h"
 #include "gui/MainWindow.h"
 #include "bluetooth/BluetoothDevice.h"
+#include "gui/FirmwareUpdateWidget.h"
 
 DatabaseManagerStruct::DatabaseManagerStruct()
     : dbWidget(nullptr)
@@ -128,6 +129,17 @@ void DatabaseTabWidget::newDatabase()
     }
 }
 
+// MB - Update Firmware
+void DatabaseTabWidget::updateFirmware()
+{
+
+
+    FirmwareUpdateWidget* firmwareUpdate = new FirmwareUpdateWidget();
+    firmwareUpdate->setWindowModality(Qt::WindowModal);
+    firmwareUpdate->show();
+
+
+}
 
 // ND - make changes here
 void DatabaseTabWidget::openDatabase()
@@ -142,6 +154,7 @@ void DatabaseTabWidget::openDatabase()
     }
 
 }
+
 
 // ND - make changes here
 void DatabaseTabWidget::openDatabase(const QString& fileName, const QString& pw,

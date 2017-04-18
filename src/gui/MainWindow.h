@@ -49,8 +49,9 @@ public:
 public Q_SLOTS:
     void openDatabase(const QString& fileName, const QString& pw = QString(),
                       const QString& keyFile = QString());
-     void newDatabase();
-    void  updateWelcomeWidget(int data,QString text);
+    void newDatabase();
+    void updateWelcomeWidget(int data,QString text);
+    void setFirmwareUpdateButton(bool);
 
 protected:
      void closeEvent(QCloseEvent* event) override;
@@ -80,6 +81,7 @@ private Q_SLOTS:
 
     //MB: new quit function
     void quitApplication();
+
 
 
 

@@ -38,8 +38,8 @@ option(WITH_TESTS "Enable building of unit tests" ON)
 option(WITH_GUI_TESTS "Enable building of GUI tests" OFF)
 option(WITH_DEV_BUILD "Use only for development. Disables/warns about deprecated methods." OFF)
 
-set(KEEPASSX_VERSION "2.0.3 Build 1012")
-set(KEEPASSX_VERSION_NUM "2.0.3 Build 1012")
+set(KEEPASSX_VERSION "2.0.3 Build 1013")
+set(KEEPASSX_VERSION_NUM "2.0.3 Build 1013")
 
 if("${CMAKE_C_COMPILER}" MATCHES "clang$" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_COMPILER_IS_CLANG 1)
