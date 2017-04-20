@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QSerialPort>
+#include <QEventLoop>
 
 #include <qbluetoothlocaldevice.h>
 
@@ -23,7 +24,8 @@
 #define  DATA_CHANNEL       2
 
 // Maximum number of seconds to wait for a connection
-#define  MAX_CONNECTION_WAIT 15
+#define  MAX_CONNECTION_WAIT 10
+#define  MAX_RETRY 3
 
 
 #define  MOST_SIGNIFICANT_BIT  0x00
@@ -53,7 +55,6 @@ public:
     static BluetoothDevice* instance();
     bool connectDevice();
     bool connectDeviceLegacy();
-    void disconnectDevice();
     QByteArray sendCommand(QString cmdName , QString cmdParams);
     void readResponse();
     void writeData(QByteArray data);
@@ -74,6 +75,7 @@ public:
      bool isCardPaired();
 private Q_SLOTS:
     void reportSerialPortError();
+
    // void handleReadyRead();
 private:
     Q_DISABLE_COPY(BluetoothDevice)
@@ -83,7 +85,8 @@ private:
     QString m_fileName ;
     QSerialPort* m_serialPort;
 
-
+Q_SIGNALS:
+    void stopWaiting();
 
 //MB: RFCOMM
  public:
@@ -94,6 +97,7 @@ private:
 
  private:
      QBluetoothSocket *socket = 0;
+     int  connectionAttempts = 0;
      bool sppConnected = false;
      bool timeout = false;
      bool dataTimeout = false;

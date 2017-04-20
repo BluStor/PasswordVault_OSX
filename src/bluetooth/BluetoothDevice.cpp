@@ -13,6 +13,7 @@
 #include <QBluetoothUuid>
 #include <QTimer>
 #include <QCoreApplication>
+#include <QApplication>
 
 BluetoothDevice* BluetoothDevice::m_instance(nullptr);
 
@@ -20,6 +21,7 @@ BluetoothDevice::BluetoothDevice(QObject* parent)
     : QObject(parent)
 {
     socket = 0 ;
+
 }
 
 BluetoothDevice::~BluetoothDevice()
@@ -27,7 +29,7 @@ BluetoothDevice::~BluetoothDevice()
     // Close port if its still open
     if(socket || socket->isOpen())
     {
-        disconnectDevice();
+        stopClient();
     }
 }
 
@@ -43,7 +45,9 @@ BluetoothDevice* BluetoothDevice::instance()
 
 void BluetoothDevice::cardTimeout() {
     timeout = true;
+    Q_EMIT stopWaiting();
 }
+
 
 bool BluetoothDevice::connectDevice()
 {
@@ -53,28 +57,46 @@ bool BluetoothDevice::connectDevice()
     {
         if(isCardPaired())
         {
+            connectionAttempts = 0;
 
-            startClient();
+            while ((connectionAttempts < MAX_RETRY) && (!connectionSuccessful)) {
 
-            // Wait MAX_CONNECTION_WAIT seconds for card connection
-            timeout = false;
-            QTimer *timer = new QTimer(this);
-            connect(timer, SIGNAL(timeout()), this, SLOT(cardTimeout()));
-            timer->start(1000 * MAX_CONNECTION_WAIT);
-            while (!sppConnected && !timeout) {
-                QCoreApplication::processEvents();
+                connectionAttempts++;
+
+                qDebug() << "Connection attempt: " << connectionAttempts << " of " << MAX_RETRY;
+                
+                // Wait MAX_CONNECTION_WAIT seconds for card connection
+                QTimer *timer = new QTimer(this);
+                connect(timer, SIGNAL(timeout()), this, SLOT(cardTimeout()));
+                timeout = false;
+                timer->start(1000 * MAX_CONNECTION_WAIT);
+            
+                QEventLoop loop;
+                loop.connect(m_instance, SIGNAL(stopWaiting()), SLOT(quit()));
+                
+                startClient();
+                
+                loop.exec();
+
+                
+                //while (!sppConnected && !timeout) {
+                //    QCoreApplication::processEvents();
+                //}
+
+
+                // Stop the timer
+                timer->stop();
+
+                if (sppConnected) {
+                    connectionSuccessful = true;
+                }
+
             }
 
-            // Stop the timer if it's still running
-            if (!timeout) timer->stop();
-
-            if (sppConnected) {
-                connectionSuccessful = true;
-
-            } else {
+            if (!connectionSuccessful) {
                 // Card failed to connect
-                QMessageBox::critical(NULL, "Card not found.", "Please check that your card is powered on.");
-                disconnectDevice();
+                QMessageBox::critical(NULL, "Card not found.", "Please check that your card is charged and powered on.");
+                stopClient();
             }
 
         }
@@ -82,30 +104,19 @@ bool BluetoothDevice::connectDevice()
         {
             // Card is not paired
             QMessageBox::critical(NULL, "Card is not paired.", "Please pair card with system and retry.");
-            disconnectDevice();
+            stopClient();
         }
     }
     else
     {
         // Bluetooth is disabled
          QMessageBox::critical(NULL, "Bluetooth is disabled.", "Please enable bluetooth and retry.");
-         disconnectDevice();
+         stopClient();
     }
 
     return connectionSuccessful;
 }
 
-
-
-void BluetoothDevice::disconnectDevice()
-{
-    // Close port if its still opern
-    if( socket)
-    {
-        if (socket->isOpen()) socket->close();
-        stopClient();
-    }
-}
 
 
 QString BluetoothDevice::getErrorMessage()
@@ -226,7 +237,7 @@ QByteArray BluetoothDevice::sendCommand(QString cmdName , QString cmdParams)
         qDebug() << "sendCommand: Device is not open.";
     }
 
-    disconnectDevice();
+    stopClient();
     return response ;
 }
 
@@ -419,7 +430,7 @@ void BluetoothDevice::deleteFile(QString path)
     }
 
 
-     disconnectDevice();
+     stopClient();
 
 
 }
@@ -470,14 +481,14 @@ bool BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByt
             else
             {
                 qDebug() << "storeFileOnCard Error(waitForBytesWritten):" <<socket->errorString();
-                disconnectDevice();
+                stopClient();
                 return returnValue;
             }
         }
         else
         {
             qDebug() << "storeFileOnCard Error(write):" <<socket->errorString();
-            disconnectDevice();
+            stopClient();
             return returnValue;
         }
 
@@ -577,7 +588,7 @@ bool BluetoothDevice::storeFileOnCard(QString onCardPath, QString fileName, QByt
         qDebug()<<"Error ; Device is not open ... Can not store file on card.";
     }
 
-    disconnectDevice();
+    stopClient();
     return returnValue;
 
 }
@@ -758,7 +769,7 @@ QByteArray BluetoothDevice::readFileFromCard( QString fileFullPathOnCard)
     }
 
 
-    disconnectDevice();
+    stopClient();
     return filteredFileData ;
 }
 
@@ -793,7 +804,7 @@ void BluetoothDevice::listMemoryInfo(QString path)
     }
 
 
-     disconnectDevice();
+     stopClient();
 }
 
 // This function checks if  file exists on  specified path on card.
@@ -847,7 +858,7 @@ bool BluetoothDevice::checkIfFileExists(QString path, QString fileName)
     }
 
 
-    disconnectDevice();
+    stopClient();
     return fileExists;
 }
 
@@ -879,8 +890,8 @@ void BluetoothDevice::startClient()
 
     // Kill the connection if we're already connected for some reason (shouldn't happen)
     if (socket) {
-        qDebug() << "startClient: killing unexpected stale socket!";
-        disconnectDevice();
+        qDebug() << "startClient: killing stale socket!";
+        stopClient();
     }
 
     // Connect to service
@@ -890,41 +901,55 @@ void BluetoothDevice::startClient()
     readReady = false;
 
     socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
-    qDebug() << "Create socket";
-    qDebug() <<  "  Mac address: " + btDeviceMac.cybergateMacAddress();
-    qDebug() <<  "  SPP_UUID: " + QString(SPP_UUID);
-    socket->connectToService(QBluetoothAddress(btDeviceMac.cybergateMacAddress()), QBluetoothUuid(QString(SPP_UUID)));
-    qDebug() << "ConnectToService done";
 
-    connect(socket, SIGNAL(readyRead()), this, SLOT(readSocket()));
-    connect(socket, SIGNAL(connected()), this, SLOT(connected()));
-    connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+    if (socket) {
+
+        connect(socket, SIGNAL(readyRead()), this, SLOT(readSocket()));
+        connect(socket, SIGNAL(connected()), this, SLOT(connected()));
+        connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+
+        qDebug() << "Create socket";
+        qDebug() <<  "  Mac address: " + btDeviceMac.cybergateMacAddress();
+        qDebug() <<  "  SPP_UUID: " + QString(SPP_UUID);
+        socket->connectToService(QBluetoothAddress(btDeviceMac.cybergateMacAddress()), QBluetoothUuid(QString(SPP_UUID)));
+        qDebug() << "ConnectToService request initiated";
+
+    } else {
+        qDebug() << "Failed to create socket";
+    }
+
 }
 
 void BluetoothDevice::stopClient()
 {
-    delete socket;
-    socket = 0;
+
+    if (socket) {
+        
+        socket->close();
+        disconnect(socket, SIGNAL(readyRead()), this, SLOT(readSocket()));
+        disconnect(socket, SIGNAL(connected()), this, SLOT(connected()));
+        disconnect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+        delete socket;
+        socket = 0;
+    }
+
     sppConnected = false;
     timeout = false;
     dataTimeout = false;
     readReady = false;
+
 }
 
 void BluetoothDevice::connected()
 {
     qDebug() << "Connection established!";
     sppConnected = true;
+    Q_EMIT stopWaiting();
 }
 
 void BluetoothDevice::disconnected()
 {
     qDebug() << "Disconnected!";
-
-    if (socket) {
-        delete socket;
-        socket = 0;
-    }
 
     sppConnected = false;
 }

@@ -82,7 +82,7 @@ void FirmwareUpdateWidget::update() {
 
         // Write the firmware to the card
         instance->storeFileOnCard("/device/", "firmware", data);
-        instance->disconnectDevice();
+        instance->stopClient();
 
         // Start 25 second timer
         timer.start(25000);

@@ -144,7 +144,7 @@ void DatabaseOpenWidget::openDatabase()
                             .append(reader.errorString()));
         m_ui->editPassword->clear();
     }
-    instance->disconnectDevice();
+    instance->stopClient();
 }
 
 CompositeKey DatabaseOpenWidget::databaseKey()
